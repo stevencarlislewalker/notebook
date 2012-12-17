@@ -195,11 +195,11 @@ hljs.initHighlightingOnLoad();
 <li>and interactions between these things.</li>
 </ol>
 
-<p>Here I decribe my work on writing a version in pure <code>R</code> that uses simpler linear algebra.</p>
+<p>Here I decribe my work on writing a version in pure <code>R</code> that is simpler for me to understand, but perhaps more numerically naive.  I hope that this will help me to better understand the sophisticated algorithms underlying <code>lmer</code> and <code>glmer</code>.  A better understanding may help to modify these algorithms for specialized problems and diagnose bugs in them.</p>
 
-<h2>Assumptions</h2>
+<h2>Background assumptions</h2>
 
-<p>I think that all I assume is an understanding of three ideas:</p>
+<p>I think that all I assume is an understanding of:</p>
 
 <ol>
 <li> matrix multiplication (two matrices become one!)</li>
@@ -208,13 +208,15 @@ hljs.initHighlightingOnLoad();
 <li> that both of these things can be done on a computer, without having to think about the details of these computations</li>
 </ol>
 
+<p>My focus will be on numerical algorithms for fitting mixed models, rather than on statistical best-practices for making inferences using these models.</p>
+
 <h2>Basic numerical problem</h2>
 
-<p>One of the coolest things about linear mixed effects models as fitted by the <code>lmer</code> function, is that the fitting proceedure consists of iteratively solving a series of linear matrix equations.  A general such linear matrix equation posses the problem of finding a matrix \( \mathbf W \), given,</p>
+<p>One of the coolest things about mixed effects models as fitted by the <code>lmer</code> and <code>glmer</code> functions, is that much of the fitting proceedure consists of iteratively solving a series of linear matrix equations.  A general such linear matrix equation posses the problem of finding a matrix \( \mathbf W \), given,</p>
 
 <p>\[ \mathbf A \mathbf W = \mathbf C \]</p>
 
-<p>where $\mathbf A $ is square and symmetric.  This can be done directly on a computer.  For example, in <code>R</code> we would use the <code>solve</code> command,</p>
+<p>where \( \mathbf A \) is square and symmetric.  This can be done directly on a computer.  For example, in <code>R</code> we would use the <code>solve</code> command,</p>
 
 <pre><code class="r">set.seed(1)
 (A &lt;- matrix(rnorm(4), 2, 2))
@@ -241,11 +243,11 @@ hljs.initHighlightingOnLoad();
 ## [2,] -0.5361  0.6526
 </code></pre>
 
-<p>This is fine if we only want to solve a few of these very small problems.  However, when fitting complex linear mixed effects models to very large data sets, this method becomes way to slow and so we need to take a less direct approach.  The approach that <code>lme4</code> takes is based on the Cholesky decomposition.</p>
+<p>This is fine if we only want to solve a few of these very small problems.  However, when fitting complex linear mixed effects models to very large data sets, this method becomes way too slow and so we need to take a less direct approach.  The approach that <code>lme4</code> takes is based on the Cholesky decomposition of \( \mathbf A \).</p>
 
 <h2>Cholesky decomposition</h2>
 
-<p>Think of this decomposition as the analogue of square root for matrices.  Using this decomposition, we can solve $\mathbf A \mathbf W = \mathbf C $ in three steps (rather than the single step above).  This sounds worse at first:  three steps instead of a single step.  But it turns out that solving the following three problems is faster than the single problem above,</p>
+<p>Think of this decomposition as the analogue of square root for matrices.  Using this decomposition, we can solve \( \mathbf A \mathbf W = \mathbf C \) in three steps (rather than the single step above).  This sounds worse at first:  three steps instead of a single step.  But it turns out that solving the following three problems is faster than the single problem above,</p>
 
 <ol>
 <li>Find the Cholesky factor, \( \mathbf L \) (i.e. matrix square root), of \( \mathbf A \), \[ \mathbf A = \mathbf L \mathbf L^\top \]</li>
@@ -253,7 +255,24 @@ hljs.initHighlightingOnLoad();
 <li>We can then solve for what we really want, \( \mathbf W \), as, \[ \mathbf W = \mathbf L^\top \mathbf W = \mathbf C \]</li>
 </ol>
 
-<p>To understand the speed, consider this example,</p>
+<p>I think that the <code>solve</code> function is doing something different.  In particular, I think that its using an LU decomposition, rather than a Cholesky.  The reason I think this is this passage from the <code>dlapack.f</code> function in the <code>/src/modules/lapack/</code> directory of <code>base</code> <code>R</code>:</p>
+
+<blockquote>
+<p>DGESV computes the solution to a real system of linear equations
+   A * X = B,
+where A is an N-by-N matrix and X and B are N-by-NRHS matrices.</p>
+
+<p>The LU decomposition with partial pivoting and row interchanges is
+used to factor A as
+   A = P * L * U,
+where P is a permutation matrix, L is unit lower triangular, and U is
+upper triangular.  The factored form of A is then used to solve the
+system of equations A * X = B.</p>
+</blockquote>
+
+<h2>How you solve it matters for speed</h2>
+
+<p>To understand the speed issue, consider this example,</p>
 
 <pre><code class="r">library(rbenchmark)
 library(RcppEigen)
@@ -299,17 +318,19 @@ benchmark(explicit.chol = {
 
 <pre><code>##                  test relative
 ## 1       explicit.chol    1.000
-## 2               solve    1.136
-## 5            qr.solve    2.068
-## 6 naive.explicit.chol    2.409
-## 3           solve.inv    2.932
-## 4   solve.with.Matrix    7.568
-## 7      solve.with.svd   20.545
+## 2               solve    1.163
+## 5            qr.solve    2.116
+## 6 naive.explicit.chol    2.465
+## 3           solve.inv    2.953
+## 4   solve.with.Matrix    7.605
+## 7      solve.with.svd   21.000
 </code></pre>
+
+<p>So lots of variability!</p>
 
 <h2>But what do these matrices mean?</h2>
 
-<p>The trick is that each of these matrics have a complex structure underlying them.  Why do we need to worry about this structure?  Well, it is this structure that allows us to relate this simple matrtix equation to our statistical interpretation of it as a linear mixed model.</p>
+<p>Each of these matrics has a complex structure underlying them.  Why do we need to worry about this structure?  It is this structure that allows us to relate this simple matrtix equation to our statistical interpretation of it as a linear mixed model.</p>
 
 <p>\[ \mathbf A = \begin{bmatrix}
 \mathbf P\left(\Lambda_\theta^\top\mathbf Z^\top\mathbf
@@ -366,6 +387,8 @@ f &lt;- rep(c(&quot;a&quot;, &quot;b&quot;), c(5, 5))  # grouping factor for ran
 
 <pre><code class="r">fm &lt;- y ~ V1 + V2 + (V1 + V2 | f)
 </code></pre>
+
+<p>In my branch of <code>lme4</code> on <code>github</code>, I&#39;ve made a function to take a formula and data frame and return the objects that the algorithms of <code>lmer</code> and <code>glmer</code> begin with,</p>
 
 <pre><code class="r">fm_df_glmer &lt;- lme4:::glmer_form_parse(fm, df)
 </code></pre>
