@@ -182,24 +182,6 @@ hljs.initHighlightingOnLoad();
 </head>
 
 <body>
-<p><head></p>
-
-<script src="http://github.com/javascripts/other/MathJax/MathJax.js"
-type="text/javascript">
-
-    if (window.location.protocol == "https:") {
-      MathJax.OutputJax.fontDir = "https://github.com/assets/MathJax/fonts"
-    } else {
-      MathJax.OutputJax.fontDir = "http://github.com/assets/MathJax/fonts"
-    }
-    MathJax.Hub.Config({
-      extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js"],
-      jax: ["input/TeX", "output/HTML-CSS"]
-    })
-</script>
-
-<p></head></p>
-
 <h1>Intro to numerical approaches to mixed models: or simpler versions of lme4 in pure R</h1>
 
 <h2>Introduction</h2>
@@ -225,8 +207,6 @@ type="text/javascript">
 <li> solving linear matrix equations</li>
 <li> that both of these things can be done on a computer, without having to think about the details of these computations</li>
 </ol>
-
-<p>MATH TEST:  \[ y = \frac{x}{z} \].</p>
 
 <h2>Basic numerical problem</h2>
 
@@ -319,12 +299,12 @@ benchmark(explicit.chol = {
 
 <pre><code>##                  test relative
 ## 1       explicit.chol    1.000
-## 2               solve    1.133
-## 5            qr.solve    2.044
-## 6 naive.explicit.chol    2.356
-## 3           solve.inv    2.889
-## 4   solve.with.Matrix    7.400
-## 7      solve.with.svd   20.244
+## 2               solve    1.136
+## 5            qr.solve    2.068
+## 6 naive.explicit.chol    2.409
+## 3           solve.inv    2.932
+## 4   solve.with.Matrix    7.568
+## 7      solve.with.svd   20.545
 </code></pre>
 
 <h2>But what do these matrices mean?</h2>
