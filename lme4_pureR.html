@@ -252,10 +252,20 @@ hljs.initHighlightingOnLoad();
 <ol>
 <li>Find the Cholesky factor, \( \mathbf L \) (i.e. matrix square root), of \( \mathbf A \), \[ \mathbf A = \mathbf L \mathbf L^\top \]</li>
 <li>Solve the following equation for a matrix called \( \mathbf T \), \[ \mathbf L \mathbf T = \mathbf C \]</li>
-<li>We can then solve for what we really want, \( \mathbf W \), as, \[ \mathbf W = \mathbf L^\top \mathbf W = \mathbf C \]</li>
+<li>We can then solve for what we really want, \( \mathbf W \), by solving the equation, \[ \mathbf L^\top \mathbf W = \mathbf T \]</li>
 </ol>
 
-<p>I think that the <code>solve</code> function is doing something different.  In particular, I think that its using an LU decomposition, rather than a Cholesky.  The reason I think this is this passage from the <code>dlapack.f</code> function in the <code>/src/modules/lapack/</code> directory of <code>base</code> <code>R</code>:</p>
+<p>The proof that this works is simple.  We&#39;ve got two expressions for \( \mathbf C \) that we can equate:</p>
+
+<p>\[ \mathbf A \mathbf W = \mathbf L \mathbf T \]</p>
+
+<p>Then we can sub in the expression for \( \mathbf T \) in number 3:</p>
+
+<p>\[ \mathbf A \mathbf W = \mathbf L \mathbf L^\top \mathbf W \]</p>
+
+<p>Getting rid of the \( \mathbf W \) on both sides yields the definition of \( \mathbf L \), which &#39;proves&#39; the validity of the method.</p>
+
+<p>I think that the <code>solve</code> function is doing something similar to the Cholesky trick.  In particular, I think that its using an LU decomposition, but a Cholesky is the special case of an LU for square symmetric matrices.  The reason I think this is this passage from the <code>dlapack.f</code> function in the <code>/src/modules/lapack/</code> directory of <code>base</code> <code>R</code>:</p>
 
 <blockquote>
 <p>DGESV computes the solution to a real system of linear equations
@@ -269,6 +279,8 @@ where P is a permutation matrix, L is unit lower triangular, and U is
 upper triangular.  The factored form of A is then used to solve the
 system of equations A * X = B.</p>
 </blockquote>
+
+<p>This quotation highlights the idea of a permutation matrix, which can be used to make the computations more efficient.  In fact, <code>lme4</code> uses permutation matrices too, as I&#39;ll explore below.</p>
 
 <h2>How you solve it matters for speed</h2>
 
@@ -318,15 +330,15 @@ benchmark(explicit.chol = {
 
 <pre><code>##                  test relative
 ## 1       explicit.chol    1.000
-## 2               solve    1.163
-## 5            qr.solve    2.116
-## 6 naive.explicit.chol    2.465
-## 3           solve.inv    2.953
-## 4   solve.with.Matrix    7.605
-## 7      solve.with.svd   21.000
+## 2               solve    1.089
+## 5            qr.solve    2.000
+## 6 naive.explicit.chol    2.333
+## 3           solve.inv    2.844
+## 4   solve.with.Matrix    7.311
+## 7      solve.with.svd   19.800
 </code></pre>
 
-<p>So lots of variability!</p>
+<p>So lots of variability!  Before sorting out what <code>lme4</code> does in particular, I&#39;ll first talk about the specific forms of the matrices required to fit linear mixed models.</p>
 
 <h2>But what do these matrices mean?</h2>
 
@@ -388,9 +400,9 @@ f &lt;- rep(c(&quot;a&quot;, &quot;b&quot;), c(5, 5))  # grouping factor for ran
 <pre><code class="r">fm &lt;- y ~ V1 + V2 + (V1 + V2 | f)
 </code></pre>
 
-<p>In my branch of <code>lme4</code> on <code>github</code>, I&#39;ve made a function to take a formula and data frame and return the objects that the algorithms of <code>lmer</code> and <code>glmer</code> begin with,</p>
+<p>In <a href="https://github.com/stevencarlislewalker/lme4/tree/master">my branch</a> of <code>lme4</code> on <code>github</code>, I&#39;ve made a function to take a formula and data frame and return the objects that the algorithms of <code>lmer</code> and <code>glmer</code> begin with,</p>
 
-<pre><code class="r">fm_df_glmer &lt;- lme4:::glmer_form_parse(fm, df)
+<pre><code class="r">fm_df_glmer &lt;- glmer_form_parse(fm, df)
 </code></pre>
 
 <p>This <code>fm_df_glmer</code> object contains many objects required to fit the model to the data.  The first things are the design matrices&mdash;the transpose of the random effects design matrix, \( \mathbf Z^\top \),</p>
@@ -529,9 +541,42 @@ Zty &lt;- Zt %*% y
 <pre><code>##  [1] -0.6265  0.1836 -0.8356  1.5953  0.3295 -0.8205  0.4874  0.7383  0.5758 -0.3054
 </code></pre>
 
-<p>The $\mathbf w $ vector contains the estimate (or value at the current iterate) of the random, \( \tilde{\mathbf u} \), and fixed, \( \widehat{\beta}_\theta \), effect coefficients.</p>
+<p>The \( \mathbf w \) vector contains the estimate (or value at the current iterate) of the random, \( \tilde{\mathbf u} \), and fixed, \( \widehat{\beta}_\theta \), effect coefficients.</p>
 
 <p>I&#39;ve left The strangest and most obscure aspect of the problem for last.  The matrix \( \mathbf P \) is a permutation matrix that doesn&#39;t change the statistical interpretation of the estimates but does improve the computational speed of the fitting proceedure.  One of the more difficult aspects of this matrix for me is the fact that it is apparently never actually computed.  Instead, \( \mathbf P \) is better thought of as a shorthand notation for using a particularly efficient method for solving a system of equations.</p>
+
+<p>The principal Cholesky decomposition of <code>lme4</code>:
+\[ 
+\mathbf A = \begin{bmatrix}
+\mathbf P\left(\Lambda_\theta^\top\mathbf Z^\top\mathbf
+      Z\Lambda_\theta+\mathbf I_q\right)\mathbf P^\top &
+    \mathbf P\Lambda_\theta^\top\mathbf Z^\top\mathbf X\\
+    \mathbf X^\top\mathbf Z\Lambda_\theta\mathbf P^\top & \mathbf X^\top\mathbf X
+  \end{bmatrix} = 
+\begin{bmatrix} 
+\mathbf L_\theta & \mathbf 0 \\
+\mathbf R^\top_\mathrm{ZX} & 
+\mathbf R^\top_\mathrm{X} \\
+\end{bmatrix}
+\begin{bmatrix} 
+\mathbf L^\top_\theta & 
+\mathbf R_\mathrm{ZX} \\
+\mathbf 0 &
+\mathbf R_\mathrm{X} \\
+\end{bmatrix}
+ \]</p>
+
+<p>However, I don&#39;t think that <code>lme4</code> algorithms actually compute this full Cholesky decomposition??  Instead they take the following steps to solving for \( \mathbf w \):</p>
+
+<ol>
+<li>Find the Cholesky decomposition, \( \mathbf L_\theta \), of the upper-left block of \( \mathbf A \): \[ P\left(\Lambda_\theta^\top\mathbf Z^\top\mathbf Z\Lambda_\theta+\mathbf I_q\right)\mathbf P^\top = \mathbf L_\theta \mathbf L^\top_\theta \]</li>
+<li>Solve the following equation for \( \mathbf R_\mathrm{ZX} \):  \[  \mathbf L_\theta \mathbf R_\mathrm{ZX} =  \mathbf P\Lambda_\theta^\top\mathbf Z^\top\mathbf X \]</li>
+<li>Do something called <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_downdate">downdating</a>, which essentially means solve the following equation for \( \mathbf R_\mathrm{X} \) in an efficient way:  \[  \mathbf R^\top_\mathrm{X} \mathbf R_\mathrm{X} = \mathbf X^\top \mathbf X - \mathbf R^\top_\mathrm{ZX} \mathbf R_\mathrm{ZX}  \]</li>
+</ol>
+
+<h2>Tricks</h2>
+
+<p>As the iterations proceed, the value of the variance component parameters, \( \theta \), change and therefore \( \mathbf \Lambda_\theta \) and \( \mathbf L_\theta \) change as well.  However, these changes can be computed efficiently using something called <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_update">updating</a>.</p>
 
 <h2>Later&hellip;</h2>
 
