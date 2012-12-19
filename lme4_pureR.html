@@ -367,28 +367,27 @@ options(width = 100)
 
 <p>Simulating a <strong>simple</strong> null test data set:</p>
 
-<pre><code class="r">n &lt;- 10 # sample size
+<pre><code class="r">n &lt;- 10  # sample size
 p &lt;- 2  # number of predictors
 
 y &lt;- rnorm(n)  # response
-X &lt;- matrix(rnorm(n*p), n, p)  # fixed effects design
-f &lt;- c(&#39;b&#39;, &#39;a&#39;, &#39;a&#39;, &#39;a&#39;, &#39;b&#39;, &#39;a&#39;, &#39;b&#39;, &#39;b&#39;, &#39;b&#39;, &#39;a&#39;)?  # grouping factor for random effects
+X &lt;- matrix(rnorm(n * p), n, p)  # fixed effects design
+f &lt;- c(&quot;b&quot;, &quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&quot;, &quot;a&quot;, &quot;b&quot;, &quot;b&quot;, &quot;b&quot;, &quot;a&quot;)  # grouping factor for random effects
 
 (df &lt;- cbind(y, as.data.frame(X), f))  # data frame with these data
 </code></pre>
 
-<pre><code>## Error: c(&quot;no documentation of type &#39;b&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X), f))&#39; (or error
-## in processing help)&quot;, &quot;no documentation of type &#39;a&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X),
-## f))&#39; (or error in processing help)&quot;, &quot;no documentation of type &#39;a&#39; and topic &#39;(df &lt;- cbind(y,
-## as.data.frame(X), f))&#39; (or error in processing help)&quot;, &quot;no documentation of type &#39;a&#39; and topic &#39;(df
-## &lt;- cbind(y, as.data.frame(X), f))&#39; (or error in processing help)&quot;, &quot;no documentation of type &#39;b&#39;
-## and topic &#39;(df &lt;- cbind(y, as.data.frame(X), f))&#39; (or error in processing help)&quot;, &quot;no documentation
-## of type &#39;a&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X), f))&#39; (or error in processing help)&quot;, &quot;no
-## documentation of type &#39;b&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X), f))&#39; (or error in processing
-## help)&quot;, &quot;no documentation of type &#39;b&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X), f))&#39; (or error
-## in processing help)&quot;, &quot;no documentation of type &#39;b&#39; and topic &#39;(df &lt;- cbind(y, as.data.frame(X),
-## f))&#39; (or error in processing help)&quot;, &quot;no documentation of type &#39;a&#39; and topic &#39;(df &lt;- cbind(y,
-## as.data.frame(X), f))&#39; (or error in processing help)&quot; )
+<pre><code>##          y       V1       V2 f
+## 1  -0.6265  1.51178  0.91898 b
+## 2   0.1836  0.38984  0.78214 a
+## 3  -0.8356 -0.62124  0.07456 a
+## 4   1.5953 -2.21470 -1.98935 a
+## 5   0.3295  1.12493  0.61983 b
+## 6  -0.8205 -0.04493 -0.05613 a
+## 7   0.4874 -0.01619 -0.15580 b
+## 8   0.7383  0.94384 -1.47075 b
+## 9   0.5758  0.82122 -0.47815 b
+## 10 -0.3054  0.59390  0.41794 a
 </code></pre>
 
 <p>Here is the model to be fitted to the data:</p>
