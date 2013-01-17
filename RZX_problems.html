@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Illustrating trouble with <code>RZX</code> in development <code>lme4</code> </title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+<h1>Illustrating trouble with <code>RZX</code> in development <code>lme4</code> </h1>
+
+<h2>What is <code>RZX</code>?</h2>
+
+<p>A <a href="https://github.com/lme4/lme4">development version</a> of the <code>lme4</code> package iteratively uses block <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition">Cholesky</a> decompositions for fitting generalized linear mixed models.  In particular, the block matrix that is Cholesky decomposed is defined by,
+\[    \begin{bmatrix}
+ \mathbf{P}\left(\Lambda_\theta^\top \mathbf{Z}^\top \mathbf{W}^{-1}
+      \mathbf{Z}\Lambda_\theta+ \mathbf{I}_q\right) \mathbf{P}^\top &
+     \mathbf{P}\Lambda_\theta^\top \mathbf{Z}^\top \mathbf{W}^{-1} \mathbf{X}\\
+     \mathbf{X}^\top \mathbf{W}^{-1} \mathbf{Z}\Lambda_\theta \mathbf{P}^\top &  \mathbf{X}^\top \mathbf{W}^{-1} \mathbf{X}
+  \end{bmatrix}
+ \]
+where \( \mathbf{Z} \) and \( \mathbf{X} \) are the random- and fixed-effects design matrices, \( \mathbf{W} \) is a diagonal weight (i.e. inverse variance) matrix, \( \Lambda_\theta \) is a triangular matrix determining the covariance matrix of the random-effects, and \( \mathbf{P} \) is a permutation matrix (which is not explicitly calculated).  The Cholesky decomposition of this matrix takes the form,
+\[    \begin{bmatrix}
+        \mathbf{L}_\theta & \mathbf{0} \\
+        \mathbf{R}^\top_{ZX} & \mathbf{R}^\top_{X} 
+     \end{bmatrix}
+     \begin{bmatrix}
+        \mathbf{L}^\top_\theta & \mathbf{R}_{ZX} \\
+        \mathbf{0} & \mathbf{R}_{X} 
+     \end{bmatrix}
+ \]
+The three blocks of this decomposition are computed in the following manner.  First, \( \mathbf{L}_\theta \) is the Cholesky factor of the first block,
+\[  \mathbf{L}_\theta \mathbf{L}^\top_\theta = \mathbf{P}\left(\Lambda_\theta^\top \mathbf{Z}^\top \mathbf{W}^{-1}
+      \mathbf{Z}\Lambda_\theta+ \mathbf{I}_q\right) \mathbf{P}^\top  \]
+With this Cholesky factor, \( \mathbf{R}_{ZX} \) can be calculated as the solution to the following linear equation,
+\[  \mathbf{L}_\theta \mathbf{R}_{ZX} = \mathbf{P}\Lambda_\theta^\top \mathbf{Z}^\top \mathbf{W}^{-1} \mathbf{X}  \]
+Finally, the matrix \( \mathbf{R}_{X} \) can be obtained via the <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition#Rank-one_downdate">downdated</a> Cholesky decomposition,
+\[  \mathbf{R}^\top_{X} \mathbf{R}_{X} = \mathbf{X}^\top \mathbf{W}^{-1} \mathbf{X} - \mathbf{R}^\top_{ZX} \mathbf{R}_{ZX}  \]</p>
+
+<p>For some reason, the calculation of \( \mathbf{R}_{ZX} \) is not being made properly in development <code>lme4</code> for some examples.  Here we describe one such example.</p>
+
+<h2>Data</h2>
+
+<p>We use a much simplified version of the <a href="https://github.com/lme4/lme4/tree/master/testsx">crabs</a> example:</p>
+
+<pre><code class="r">options(width = 200)
+setwd(&quot;~/Development/lme4_experimentation/nailing_down_RZX&quot;)
+load(&quot;crabs_randdata00.Rda&quot;)
+randdata00
+</code></pre>
+
+<pre><code>##    final.snail.density snails.lost crab.speciesS crab.sizeS snail.size plot
+## 1                   43          10             0          0          S    8
+## 2                   27          26             0          0          S   25
+## 3                   45           8             0          0          S   39
+## 4                   37          16             0          0          S   48
+## 5                   22           3             0          0          L    8
+## 6                   25           0             0          0          L   25
+## 7                   22           3             0          0          L   39
+## 8                   24           1             0          0          L   48
+## 9                   32          21             1          0          S    9
+## 10                  10          43             1          0          S   10
+## 11                   8          45             1          0          S   19
+## 12                  28          25             1          0          S   45
+## 13                  15          38             1          0          S   55
+## 14                  24           1             1          0          L    9
+## 15                  25           0             1          0          L   10
+## 16                  25           0             1          0          L   19
+## 17                  23           2             1          0          L   45
+## 18                  23           2             1          0          L   55
+## 19                  41          12             1          0          S   30
+## 20                  36          17             1          0          S   36
+## 21                  46           7             1          0          S   42
+## 22                  46           7             1          0          S   47
+## 23                  30          23             1          0          S   53
+## 24                  21           4             1          0          L   30
+## 25                  22           3             1          0          L   36
+## 26                  24           1             1          0          L   42
+## 27                  24           1             1          0          L   47
+## 28                  24           1             1          0          L   53
+## 29                  41          12             1          1          S    6
+## 30                  33          20             1          1          S   37
+## 31                  39          14             1          1          S   43
+## 32                  39          14             1          1          S   52
+## 33                  45           8             1          1          S   62
+## 34                  24           1             1          1          L    6
+## 35                  24           1             1          1          L   37
+## 36                  22           3             1          1          L   43
+## 37                  24           1             1          1          L   52
+## 38                  24           1             1          1          L   62
+## 39                  36          17             0          0          S   18
+## 40                  24          29             0          0          S   31
+## 41                  23          30             0          0          S   34
+## 42                  25          28             0          0          S   41
+## 43                  30          23             0          0          S   56
+## 44                  20           5             0          0          L   18
+## 45                  18           7             0          0          L   31
+## 46                  19           6             0          0          L   34
+## 47                  12          13             0          0          L   41
+## 48                  24           1             0          0          L   56
+## 49                  43          10             0          0          S    4
+## 50                  36          17             0          0          S   22
+## 51                  39          14             0          0          S   29
+## 52                  45           8             0          0          S   46
+## 53                  33          20             0          0          S   63
+## 54                  23           2             0          0          L    4
+## 55                  23           2             0          0          L   22
+## 56                  25           0             0          0          L   29
+## 57                  18           7             0          0          L   46
+## 58                  15          10             0          0          L   63
+## 59                  34          19             0          1          S   13
+## 60                  39          14             0          1          S   16
+## 61                  37          16             0          1          S   26
+## 62                  34          19             0          1          S   57
+## 63                  41          12             0          1          S   60
+## 64                  25           0             0          1          L   13
+## 65                  24           1             0          1          L   16
+## 66                  21           4             0          1          L   26
+## 67                  25           0             0          1          L   57
+## 68                  24           1             0          1          L   60
+</code></pre>
+
+<p>Here we compare two model fits to these data, one that fails to properly compute <code>RZX</code> and one that doesn&#39;t.  These two source files fit these two models (the first one works, the second doesn&#39;t):</p>
+
+<pre><code class="r">options(width = 100)
+scan(&quot;crabs_simpler.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;library(lme4)&quot;                                                            
+## [2] &quot;setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)&quot;             
+## [3] &quot;load(&#39;crabs_randdata00.Rda&#39;)&quot;                                             
+## [4] &quot;fr &lt;- &quot;                                                                   
+## [5] &quot;  cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + &quot;
+## [6] &quot;  crab.speciesS:crab.sizeS + (1 | plot)&quot;                                  
+## [7] &quot;options(width = 200)&quot;                                                     
+## [8] &quot;glmer(fr, data = randdata00, family = &#39;binomial&#39;)&quot;
+</code></pre>
+
+<pre><code class="r">scan(&quot;crabs.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;library(lme4)&quot;                                                            
+## [2] &quot;setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)&quot;             
+## [3] &quot;load(&#39;crabs_randdata00.Rda&#39;)&quot;                                             
+## [4] &quot;fr &lt;- &quot;                                                                   
+## [5] &quot;  cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + &quot;
+## [6] &quot;  crab.speciesS:crab.sizeS + (snail.size | plot)&quot;                         
+## [7] &quot;glmer(fr, data = randdata00, family = &#39;binomial&#39;)&quot;
+</code></pre>
+
+<p>The only difference between the two models is that one has a random intercept and the other a random <code>snail.size</code> effect.</p>
+
+<p>We now demonstrate the one of the models works while the other doesn&#39;t, and print out the error messages that result:</p>
+
+<pre><code class="r">err_simpler &lt;- try(source(&quot;crabs_simpler.R&quot;))
+err &lt;- try(source(&quot;crabs.R&quot;))
+</code></pre>
+
+<p>The <code>crabs_simpler.R</code> example works:</p>
+
+<pre><code class="r">print(err_simpler)
+</code></pre>
+
+<pre><code>## $value
+## Generalized linear mixed model fit by maximum likelihood [&#39;glmerMod&#39;]
+##  Family: binomial ( logit )
+## Formula: cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS +      crab.speciesS:crab.sizeS + (1 | plot) 
+##    Data: randdata00 
+## 
+##      AIC      BIC   logLik deviance 
+##    676.9    688.0   -333.5    666.9 
+## 
+## Random effects:
+##  Groups Name        Variance Std.Dev.
+##  plot   (Intercept) 0.309    0.556   
+## Number of obs: 68, groups: plot, 34
+## 
+## Fixed effects:
+##                          Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                 0.960      0.164    5.85  4.9e-09 ***
+## crab.speciesS              -0.140      0.254   -0.55     0.58    
+## crab.sizeS                  0.328      0.322    1.02     0.31    
+## crab.speciesS:crab.sizeS    0.330      0.469    0.70     0.48    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
+## 
+## Correlation of Fixed Effects:
+##             (Intr) crb.spS crb.szS
+## crab.specsS -0.646                
+## crab.sizeS  -0.509  0.329         
+## crb.spcS:.S  0.350 -0.541  -0.686 
+## 
+## $visible
+## [1] TRUE
+</code></pre>
+
+<p>but not the <code>crabs.R</code> example:</p>
+
+<pre><code class="r">print(err)
+</code></pre>
+
+<pre><code>## [1] &quot;Error in glmer(fr, data = randdata00, family = \&quot;binomial\&quot;) : \n  pwrssUpdate did not converge in 30 iterations\n&quot;
+## attr(,&quot;class&quot;)
+## [1] &quot;try-error&quot;
+## attr(,&quot;condition&quot;)
+## &lt;std::runtime_error in glmer(fr, data = randdata00, family = &quot;binomial&quot;): pwrssUpdate did not converge in 30 iterations&gt;
+</code></pre>
+
+<h2>Modifications to <code>lme4</code> for debugging purposes</h2>
+
+<p>The following modifications are incorporated into my <a href="https://github.com/stevencarlislewalker/lme4/tree/master">branch</a> of <code>lme4</code> on <a href="https://github.com/">github</a>.  To print out the values of the <code>RZX</code> matrices computed by <code>lme4</code>, we modified the <code>merPredD::updateDecomp</code> function in the <code>predModule.cpp</code> file:</p>
+
+<pre><code>void merPredD::updateDecomp() { // update L, RZX and RX
+  updateL();
+  d_RZX         = d_LamtUt * d_V;
+  Rcpp::Rcout &lt;&lt; &quot;RZX:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
+</code></pre>
+
+<p>The modification is the final line in this snipet, which prints out the <code>RZX</code> matrix everytime it is computed.</p>
+
+<p>We also modify the <code>glmer</code> function in <code>lmer.R</code> to calculate and print out <code>RZX</code> &#39;by hand&#39;.  First, we create two lists of variables (<code>pp_byhand</code> and <code>resp_byhand</code>), which contain the ingredients necessary to make the first calculation of <code>RZX</code>, and then we compute and print out <code>RZX</code> itself,</p>
+
+<pre><code class="r">rho &lt;- as.environment(list(verbose = verbose, tolPwrss = tolPwrss))
+parent.env(rho) &lt;- parent.frame()
+
+pp_byhand &lt;- c(reTrms[c(&quot;Zt&quot;, &quot;theta&quot;, &quot;Lambdat&quot;, &quot;Lind&quot;)], n = nrow(X), list(X = X))
+resp_byhand &lt;- mkRespMod(fr, family = family)
+RZXhand &lt;- RZXbyhand(pp = pp_byhand, resp = resp_byhand, includeH = FALSE)
+</code></pre>
+
+<p>where we have also added the function <code>RZXbyhand</code> to <code>lme4</code>,</p>
+
+<pre><code class="r">lme4:::RZXbyhand
+</code></pre>
+
+<pre><code>## function (pp, resp, includeH = TRUE) 
+## {
+##     LambdatZt &lt;- pp$Lambdat %*% pp$Zt
+##     if (includeH) 
+##         Winv &lt;- diag(resp$n * resp$mu * (1 - resp$mu), length(resp$mu), 
+##             length(resp$mu))
+##     else Winv &lt;- diag(1, ncol(LambdatZt), ncol(LambdatZt))
+##     Winv &lt;- as(Winv, &quot;dgCMatrix&quot;)
+##     LambdatZtWinv &lt;- LambdatZt %*% Winv
+##     UtU &lt;- tcrossprod(LambdatZtWinv, LambdatZt)
+##     UtV &lt;- LambdatZtWinv %*% pp$X
+##     VtV &lt;- crossprod(pp$X, crossprod(Winv, pp$X))
+##     Lt &lt;- Cholesky(UtU, LDL = FALSE, Imult = 1)
+##     RZX &lt;- solve(Lt, UtV, system = &quot;L&quot;)
+##     RX &lt;- Cholesky(as(VtV - crossprod(RZX), &quot;dgCMatrix&quot;))
+##     dimnames(RZX) &lt;- dimnames(RX) &lt;- dimnames(Lt) &lt;- NULL
+##     print(&quot;R_ZX by hand:&quot;)
+##     raw_matrix_print(RZX)
+##     return(RZX)
+## }
+## &lt;environment: namespace:lme4&gt;
+</code></pre>
+
+<p>as well as the function,</p>
+
+<pre><code class="r">lme4:::raw_matrix_print
+</code></pre>
+
+<pre><code>## function (x) 
+## for (i in 1:nrow(x)) cat(x[i, ], &quot;\n&quot;)
+## &lt;environment: namespace:lme4&gt;
+</code></pre>
+
+<p>We make several further modifications to the <code>glmer</code> function in <code>lmer.R</code>, which simply call the <code>RZXbyhand</code> function at various points in the model fitting process.  After the <code>pp</code> module is created:</p>
+
+<pre><code class="r">rho$pp &lt;- do.call(merPredD$new, c(reTrms[c(&quot;Zt&quot;, &quot;theta&quot;, &quot;Lambdat&quot;, &quot;Lind&quot;)], n = nrow(X), list(X = X)))
+
+RZXhand &lt;- RZXbyhand(pp = rho$pp$copy(), resp = resp_byhand, includeH = FALSE)
+</code></pre>
+
+<p>After the <code>resp</code> module is created:</p>
+
+<pre><code class="r">rho$resp &lt;- mkRespMod(fr, family = family)
+if (length(unique(rho$resp$y)) &lt; 2L) stop(&quot;Response is constant - cannot fit the model&quot;)
+rho$verbose &lt;- as.integer(verbose)
+
+RZXhand &lt;- RZXbyhand(rho$pp$copy(), rho$resp$copy())
+</code></pre>
+
+<p>After calling <code>glmerLaplace</code>:</p>
+
+<pre><code class="r">.Call(glmerLaplace, rho$pp$ptr(), rho$resp$ptr(), 0L, tolPwrss, verbose)
+
+RZXhand &lt;- RZXbyhand(rho$pp$copy(), rho$resp$copy())
+</code></pre>
+
+<p>After a couple optimizations:</p>
+
+<pre><code class="r">rho$lp0 &lt;- rho$pp$linPred(1)  # each pwrss opt begins at this eta
+rho$pwrssUpdate &lt;- glmerPwrssUpdate
+rho$compDev &lt;- compDev
+rho$lower &lt;- reTrms$lower  # not needed in rho?
+devfun &lt;- mkdevfun(rho, 0L)
+if (devFunOnly &amp;&amp; !nAGQ) return(devfun)
+if (length(optimizer) == 1) {
+    optimizer &lt;- replicate(2, optimizer)
+}
+
+RZXhand &lt;- RZXbyhand(rho$pp$copy(), rho$resp$copy())
+</code></pre>
+
+<p>After the first round of optimizing over <code>theta</code>:</p>
+
+<pre><code class="r">opt &lt;- optwrap(optimizer[[1]], devfun, rho$pp$theta, rho$lower, control = control, adj = FALSE, verbose = verbose)
+
+RZXhand &lt;- RZXbyhand(rho$pp$copy(), rho$resp$copy())
+</code></pre>
+
+<p>After the second round of optimizing over <code>theta</code>:</p>
+
+<pre><code class="r">rho$control &lt;- attr(opt, &quot;control&quot;)
+
+rho$nAGQ &lt;- nAGQ
+if (nAGQ &gt; 0L) {
+    rho$nAGQ &lt;- nAGQ
+    rho$lower &lt;- c(rho$lower, rep.int(-Inf, length(rho$pp$beta0)))
+    rho$lp0 &lt;- rho$pp$linPred(1)
+    rho$dpars &lt;- seq_along(rho$pp$theta)
+    rho$baseOffset &lt;- rho$resp$offset + 0  # forcing a copy (!)
+    rho$GQmat &lt;- GHrule(nAGQ)
+    rho$fac &lt;- reTrms$flist[[1]]
+    if (nAGQ &gt; 1L) {
+        if (length(reTrms$flist) != 1L || length(reTrms$cnms[[1]]) != 1L) 
+            stop(&quot;nAGQ &gt; 1 is only available for models with a single, scalar random-effects term&quot;)
+    }
+    devfun &lt;- mkdevfun(rho, nAGQ)
+    if (devFunOnly) 
+        return(devfun)
+
+    opt &lt;- optwrap(optimizer[[2]], devfun, c(rho$pp$theta, rho$pp$delb), rho$lower, control = control, adj = TRUE, verbose = verbose)
+    rho$resp$setOffset(rho$baseOffset)
+}
+
+RZXhand &lt;- RZXbyhand(rho$pp$copy(), rho$resp$copy())
+</code></pre>
+
+<h2>Running the models</h2>
+
+<p>So we run the source files and read in the results:</p>
+
+<pre><code class="r">system(&quot;R CMD BATCH crabs_simpler.R&quot;)
+crabsout_simpler &lt;- scan(&quot;crabs_simpler.Rout&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+system(&quot;R CMD BATCH crabs.R&quot;)
+crabsout &lt;- scan(&quot;crabs.Rout&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+</code></pre>
+
+<h2><code>grep</code>ing the printouts of the <code>RZX</code> matrices</h2>
+
+<p>Some ugly <code>grep</code>ing:</p>
+
+<pre><code class="r">code_RZXlines &lt;- outer(grep(&quot;RZX:&quot;, crabsout), c(1, 68), &quot;+&quot;)
+hand_RZXlines &lt;- outer(grep(&quot;by hand&quot;, crabsout), c(1, 68), &quot;+&quot;)
+code_RZXlines_simpler &lt;- outer(grep(&quot;RZX:&quot;, crabsout_simpler), c(1, 34), &quot;+&quot;)
+hand_RZXlines_simpler &lt;- outer(grep(&quot;by hand&quot;, crabsout_simpler), c(1, 34), &quot;+&quot;)
+</code></pre>
+
+<p>Then we match up each <code>RZX</code> calculated &#39;by hand&#39;, with an associated matrix calculated &#39;by code&#39; (i.e. within <code>lme4</code>):</p>
+
+<pre><code class="r">RZX_comp &lt;- sapply(apply(outer(code_RZXlines[, 1], hand_RZXlines[, 1], &quot;&gt;&quot;), 2, which), min)
+RZX_comp &lt;- RZX_comp[is.finite(RZX_comp)]
+RZX_comp_simpler &lt;- sapply(apply(outer(code_RZXlines_simpler[, 1], hand_RZXlines_simpler[, 1], &quot;&gt;&quot;), 2, which), min)
+</code></pre>
+
+<pre><code>## Warning: no non-missing arguments to min; returning Inf
+</code></pre>
+
+<pre><code class="r">RZX_comp_simpler &lt;- RZX_comp_simpler[is.finite(RZX_comp_simpler)]
+</code></pre>
+
+<p>The matched matrix is the first one calculated immediately after the matrix calculated by hand.</p>
+
+<h2>Comparing the &#39;by hand&#39; with the &#39;by code&#39; calculations</h2>
+
+<p>First a fun little function for prettier printing (can be ignored)</p>
+
+<pre><code class="r">int_to_ranking &lt;- function(i) {
+    i &lt;- suppressWarnings(as.integer(i))
+    last_digit &lt;- as.numeric(substring(i, nchar(i)))
+    ending &lt;- sapply(last_digit + 1, switch, &quot;th&quot;, &quot;st&quot;, &quot;nd&quot;, &quot;rd&quot;, &quot;th&quot;, &quot;th&quot;, &quot;th&quot;, &quot;th&quot;, &quot;th&quot;, &quot;th&quot;)
+    second_last_digit &lt;- as.numeric(substring(i, nchar(i) - 1, nchar(i) - 1))
+    ending[second_last_digit == 1L] &lt;- &quot;th&quot;
+    paste(i, ending, sep = &quot;&quot;)
+}
+</code></pre>
+
+<p>First the model that &#39;works&#39;:</p>
+
+<pre><code class="r">options(width = 60)
+for (i in seq_along(RZX_comp_simpler)) {
+    code_lines_simpler &lt;- crabsout_simpler[code_RZXlines_simpler[RZX_comp_simpler[i], 1]:code_RZXlines_simpler[RZX_comp_simpler[i], 2]]
+    hand_lines_simpler &lt;- crabsout_simpler[hand_RZXlines_simpler[i, 1]:hand_RZXlines_simpler[i, 2]]
+
+    cat(int_to_ranking(i), &quot;RZX calculated by the code:\n&quot;)
+    print(code_lines_simpler)
+    cat(int_to_ranking(i), &quot;RZX calculated by hand:\n&quot;)
+    print(hand_lines_simpler)
+}
+</code></pre>
+
+<pre><code>## 1st RZX calculated by the code:
+##  [1] &quot;1.1547      0      0      0&quot;
+##  [2] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+##  [3] &quot;1.1547      0      0      0&quot;
+##  [4] &quot;1.1547 1.1547      0      0&quot;
+##  [5] &quot;1.1547 1.1547      0      0&quot;
+##  [6] &quot;1.1547      0 1.1547      0&quot;
+##  [7] &quot;1.1547      0 1.1547      0&quot;
+##  [8] &quot;1.1547      0      0      0&quot;
+##  [9] &quot;1.1547 1.1547      0      0&quot;
+## [10] &quot;1.1547      0      0      0&quot;
+## [11] &quot;1.1547      0      0      0&quot;
+## [12] &quot;1.1547      0 1.1547      0&quot;
+## [13] &quot;1.1547      0      0      0&quot;
+## [14] &quot;1.1547 1.1547      0      0&quot;
+## [15] &quot;1.1547      0      0      0&quot;
+## [16] &quot;1.1547      0      0      0&quot;
+## [17] &quot;1.1547 1.1547      0      0&quot;
+## [18] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [19] &quot;1.1547      0      0      0&quot;
+## [20] &quot;1.1547      0      0      0&quot;
+## [21] &quot;1.1547 1.1547      0      0&quot;
+## [22] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [23] &quot;1.1547 1.1547      0      0&quot;
+## [24] &quot;1.1547      0      0      0&quot;
+## [25] &quot;1.1547 1.1547      0      0&quot;
+## [26] &quot;1.1547      0      0      0&quot;
+## [27] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [28] &quot;1.1547 1.1547      0      0&quot;
+## [29] &quot;1.1547 1.1547      0      0&quot;
+## [30] &quot;1.1547      0      0      0&quot;
+## [31] &quot;1.1547      0 1.1547      0&quot;
+## [32] &quot;1.1547      0 1.1547      0&quot;
+## [33] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [34] &quot;1.1547      0      0      0&quot;
+## 1st RZX calculated by hand:
+##  [1] &quot;1.154701 0 0 0 &quot;                     
+##  [2] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+##  [3] &quot;1.154701 0 0 0 &quot;                     
+##  [4] &quot;1.154701 1.154701 0 0 &quot;              
+##  [5] &quot;1.154701 1.154701 0 0 &quot;              
+##  [6] &quot;1.154701 0 1.154701 0 &quot;              
+##  [7] &quot;1.154701 0 1.154701 0 &quot;              
+##  [8] &quot;1.154701 0 0 0 &quot;                     
+##  [9] &quot;1.154701 1.154701 0 0 &quot;              
+## [10] &quot;1.154701 0 0 0 &quot;                     
+## [11] &quot;1.154701 0 0 0 &quot;                     
+## [12] &quot;1.154701 0 1.154701 0 &quot;              
+## [13] &quot;1.154701 0 0 0 &quot;                     
+## [14] &quot;1.154701 1.154701 0 0 &quot;              
+## [15] &quot;1.154701 0 0 0 &quot;                     
+## [16] &quot;1.154701 0 0 0 &quot;                     
+## [17] &quot;1.154701 1.154701 0 0 &quot;              
+## [18] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [19] &quot;1.154701 0 0 0 &quot;                     
+## [20] &quot;1.154701 0 0 0 &quot;                     
+## [21] &quot;1.154701 1.154701 0 0 &quot;              
+## [22] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [23] &quot;1.154701 1.154701 0 0 &quot;              
+## [24] &quot;1.154701 0 0 0 &quot;                     
+## [25] &quot;1.154701 1.154701 0 0 &quot;              
+## [26] &quot;1.154701 0 0 0 &quot;                     
+## [27] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [28] &quot;1.154701 1.154701 0 0 &quot;              
+## [29] &quot;1.154701 1.154701 0 0 &quot;              
+## [30] &quot;1.154701 0 0 0 &quot;                     
+## [31] &quot;1.154701 0 1.154701 0 &quot;              
+## [32] &quot;1.154701 0 1.154701 0 &quot;              
+## [33] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [34] &quot;1.154701 0 0 0 &quot;                     
+## 2nd RZX calculated by the code:
+##  [1] &quot;1.1547      0      0      0&quot;
+##  [2] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+##  [3] &quot;1.1547      0      0      0&quot;
+##  [4] &quot;1.1547 1.1547      0      0&quot;
+##  [5] &quot;1.1547 1.1547      0      0&quot;
+##  [6] &quot;1.1547      0 1.1547      0&quot;
+##  [7] &quot;1.1547      0 1.1547      0&quot;
+##  [8] &quot;1.1547      0      0      0&quot;
+##  [9] &quot;1.1547 1.1547      0      0&quot;
+## [10] &quot;1.1547      0      0      0&quot;
+## [11] &quot;1.1547      0      0      0&quot;
+## [12] &quot;1.1547      0 1.1547      0&quot;
+## [13] &quot;1.1547      0      0      0&quot;
+## [14] &quot;1.1547 1.1547      0      0&quot;
+## [15] &quot;1.1547      0      0      0&quot;
+## [16] &quot;1.1547      0      0      0&quot;
+## [17] &quot;1.1547 1.1547      0      0&quot;
+## [18] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [19] &quot;1.1547      0      0      0&quot;
+## [20] &quot;1.1547      0      0      0&quot;
+## [21] &quot;1.1547 1.1547      0      0&quot;
+## [22] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [23] &quot;1.1547 1.1547      0      0&quot;
+## [24] &quot;1.1547      0      0      0&quot;
+## [25] &quot;1.1547 1.1547      0      0&quot;
+## [26] &quot;1.1547      0      0      0&quot;
+## [27] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [28] &quot;1.1547 1.1547      0      0&quot;
+## [29] &quot;1.1547 1.1547      0      0&quot;
+## [30] &quot;1.1547      0      0      0&quot;
+## [31] &quot;1.1547      0 1.1547      0&quot;
+## [32] &quot;1.1547      0 1.1547      0&quot;
+## [33] &quot;1.1547 1.1547 1.1547 1.1547&quot;
+## [34] &quot;1.1547      0      0      0&quot;
+## 2nd RZX calculated by hand:
+##  [1] &quot;1.154701 0 0 0 &quot;                     
+##  [2] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+##  [3] &quot;1.154701 0 0 0 &quot;                     
+##  [4] &quot;1.154701 1.154701 0 0 &quot;              
+##  [5] &quot;1.154701 1.154701 0 0 &quot;              
+##  [6] &quot;1.154701 0 1.154701 0 &quot;              
+##  [7] &quot;1.154701 0 1.154701 0 &quot;              
+##  [8] &quot;1.154701 0 0 0 &quot;                     
+##  [9] &quot;1.154701 1.154701 0 0 &quot;              
+## [10] &quot;1.154701 0 0 0 &quot;                     
+## [11] &quot;1.154701 0 0 0 &quot;                     
+## [12] &quot;1.154701 0 1.154701 0 &quot;              
+## [13] &quot;1.154701 0 0 0 &quot;                     
+## [14] &quot;1.154701 1.154701 0 0 &quot;              
+## [15] &quot;1.154701 0 0 0 &quot;                     
+## [16] &quot;1.154701 0 0 0 &quot;                     
+## [17] &quot;1.154701 1.154701 0 0 &quot;              
+## [18] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [19] &quot;1.154701 0 0 0 &quot;                     
+## [20] &quot;1.154701 0 0 0 &quot;                     
+## [21] &quot;1.154701 1.154701 0 0 &quot;              
+## [22] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [23] &quot;1.154701 1.154701 0 0 &quot;              
+## [24] &quot;1.154701 0 0 0 &quot;                     
+## [25] &quot;1.154701 1.154701 0 0 &quot;              
+## [26] &quot;1.154701 0 0 0 &quot;                     
+## [27] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [28] &quot;1.154701 1.154701 0 0 &quot;              
+## [29] &quot;1.154701 1.154701 0 0 &quot;              
+## [30] &quot;1.154701 0 0 0 &quot;                     
+## [31] &quot;1.154701 0 1.154701 0 &quot;              
+## [32] &quot;1.154701 0 1.154701 0 &quot;              
+## [33] &quot;1.154701 1.154701 1.154701 1.154701 &quot;
+## [34] &quot;1.154701 0 0 0 &quot;                     
+## 3rd RZX calculated by the code:
+##  [1] &quot;3.09218       0       0       0&quot;
+##  [2] &quot;3.14206 3.14206 3.14206 3.14206&quot;
+##  [3] &quot;3.20873       0       0       0&quot;
+##  [4] &quot;3.62294 3.62294       0       0&quot;
+##  [5] &quot;2.80634 2.80634       0       0&quot;
+##  [6] &quot;3.43106       0 3.43106       0&quot;
+##  [7] &quot;3.29355       0 3.29355       0&quot;
+##  [8] &quot;3.85214       0       0       0&quot;
+##  [9] &quot;2.57266 2.57266       0       0&quot;
+## [10] &quot;3.58469       0       0       0&quot;
+## [11] &quot; 3.5756       0       0       0&quot;
+## [12] &quot;3.72658       0 3.72658       0&quot;
+## [13] &quot;3.15686       0       0       0&quot;
+## [14] &quot;3.47534 3.47534       0       0&quot;
+## [15] &quot;4.16168       0       0       0&quot;
+## [16] &quot;4.09491       0       0       0&quot;
+## [17] &quot;3.68598 3.68598       0       0&quot;
+## [18] &quot;3.59285 3.59285 3.59285 3.59285&quot;
+## [19] &quot;3.00552       0       0       0&quot;
+## [20] &quot;4.30102       0       0       0&quot;
+## [21] &quot;2.61013 2.61013       0       0&quot;
+## [22] &quot;3.52026 3.52026 3.52026 3.52026&quot;
+## [23] &quot;3.80038 3.80038       0       0&quot;
+## [24] &quot;3.35212       0       0       0&quot;
+## [25] &quot;2.61013 2.61013       0       0&quot;
+## [26] &quot;3.41742       0       0       0&quot;
+## [27] &quot;3.29355 3.29355 3.29355 3.29355&quot;
+## [28] &quot;3.66762 3.66762       0       0&quot;
+## [29] &quot;3.47711 3.47711       0       0&quot;
+## [30] &quot;3.66762       0       0       0&quot;
+## [31] &quot;3.43106       0 3.43106       0&quot;
+## [32] &quot;3.14206       0 3.14206       0&quot;
+## [33] &quot; 2.7377  2.7377  2.7377  2.7377&quot;
+## [34] &quot;4.18954       0       0       0&quot;
+## 3rd RZX calculated by hand:
+##  [1] &quot;3.092176 0 0 0 &quot;                     
+##  [2] &quot;3.142056 3.142056 3.142056 3.142056 &quot;
+##  [3] &quot;3.208726 0 0 0 &quot;                     
+##  [4] &quot;3.622939 3.622939 0 0 &quot;              
+##  [5] &quot;2.80634 2.80634 0 0 &quot;                
+##  [6] &quot;3.431056 0 3.431056 0 &quot;              
+##  [7] &quot;3.293551 0 3.293551 0 &quot;              
+##  [8] &quot;3.852142 0 0 0 &quot;                     
+##  [9] &quot;2.572657 2.572657 0 0 &quot;              
+## [10] &quot;3.584691 0 0 0 &quot;                     
+## [11] &quot;3.575602 0 0 0 &quot;                     
+## [12] &quot;3.726576 0 3.726576 0 &quot;              
+## [13] &quot;3.156858 0 0 0 &quot;                     
+## [14] &quot;3.475343 3.475343 0 0 &quot;              
+## [15] &quot;4.161681 0 0 0 &quot;                     
+## [16] &quot;4.094909 0 0 0 &quot;                     
+## [17] &quot;3.685978 3.685978 0 0 &quot;              
+## [18] &quot;3.592848 3.592848 3.592848 3.592848 &quot;
+## [19] &quot;3.00552 0 0 0 &quot;                      
+## [20] &quot;4.301018 0 0 0 &quot;                     
+## [21] &quot;2.610135 2.610135 0 0 &quot;              
+## [22] &quot;3.520261 3.520261 3.520261 3.520261 &quot;
+## [23] &quot;3.800376 3.800376 0 0 &quot;              
+## [24] &quot;3.352115 0 0 0 &quot;                     
+## [25] &quot;2.610135 2.610135 0 0 &quot;              
+## [26] &quot;3.417417 0 0 0 &quot;                     
+## [27] &quot;3.293551 3.293551 3.293551 3.293551 &quot;
+## [28] &quot;3.66762 3.66762 0 0 &quot;                
+## [29] &quot;3.477113 3.477113 0 0 &quot;              
+## [30] &quot;3.66762 0 0 0 &quot;                      
+## [31] &quot;3.431056 0 3.431056 0 &quot;              
+## [32] &quot;3.142056 0 3.142056 0 &quot;              
+## [33] &quot;2.737703 2.737703 2.737703 2.737703 &quot;
+## [34] &quot;4.189537 0 0 0 &quot;                     
+## 4th RZX calculated by the code:
+##  [1] &quot;3.11495       0       0       0&quot;
+##  [2] &quot;3.16307 3.16307 3.16307 3.16307&quot;
+##  [3] &quot;3.21033       0       0       0&quot;
+##  [4] &quot; 3.8593  3.8593       0       0&quot;
+##  [5] &quot;4.29341 4.29341       0       0&quot;
+##  [6] &quot;3.65664       0 3.65664       0&quot;
+##  [7] &quot;3.35902       0 3.35902       0&quot;
+##  [8] &quot;3.85266       0       0       0&quot;
+##  [9] &quot;4.27109 4.27109       0       0&quot;
+## [10] &quot; 3.6767       0       0       0&quot;
+## [11] &quot;4.03768       0       0       0&quot;
+## [12] &quot;3.72015       0 3.72015       0&quot;
+## [13] &quot;3.30034       0       0       0&quot;
+## [14] &quot;3.47414 3.47414       0       0&quot;
+## [15] &quot;4.28569       0       0       0&quot;
+## [16] &quot;4.28569       0       0       0&quot;
+## [17] &quot; 3.7467  3.7467       0       0&quot;
+## [18] &quot;3.76876 3.76876 3.76876 3.76876&quot;
+## [19] &quot;3.01363       0       0       0&quot;
+## [20] &quot;4.30538       0       0       0&quot;
+## [21] &quot;2.68473 2.68473       0       0&quot;
+## [22] &quot;3.50235 3.50235 3.50235 3.50235&quot;
+## [23] &quot;4.08027 4.08027       0       0&quot;
+## [24] &quot;3.38477       0       0       0&quot;
+## [25] &quot;2.68473 2.68473       0       0&quot;
+## [26] &quot;3.53958       0       0       0&quot;
+## [27] &quot;3.34284 3.34284 3.34284 3.34284&quot;
+## [28] &quot;3.95763 3.95763       0       0&quot;
+## [29] &quot;4.30679 4.30679       0       0&quot;
+## [30] &quot;3.95187       0       0       0&quot;
+## [31] &quot;3.65664       0 3.65664       0&quot;
+## [32] &quot; 3.1813       0  3.1813       0&quot;
+## [33] &quot; 2.7307  2.7307  2.7307  2.7307&quot;
+## [34] &quot;4.17165       0       0       0&quot;
+## 4th RZX calculated by hand:
+##  [1] &quot;3.11495 0 0 0 &quot;                      
+##  [2] &quot;3.163052 3.163052 3.163052 3.163052 &quot;
+##  [3] &quot;3.210326 0 0 0 &quot;                     
+##  [4] &quot;3.859287 3.859287 0 0 &quot;              
+##  [5] &quot;4.293369 4.293369 0 0 &quot;              
+##  [6] &quot;3.656462 0 3.656462 0 &quot;              
+##  [7] &quot;3.358991 0 3.358991 0 &quot;              
+##  [8] &quot;3.852659 0 0 0 &quot;                     
+##  [9] &quot;4.270885 4.270885 0 0 &quot;              
+## [10] &quot;3.676696 0 0 0 &quot;                     
+## [11] &quot;4.037635 0 0 0 &quot;                     
+## [12] &quot;3.720148 0 3.720148 0 &quot;              
+## [13] &quot;3.300151 0 0 0 &quot;                     
+## [14] &quot;3.474144 3.474144 0 0 &quot;              
+## [15] &quot;4.285692 0 0 0 &quot;                     
+## [16] &quot;4.285692 0 0 0 &quot;                     
+## [17] &quot;3.746708 3.746708 0 0 &quot;              
+## [18] &quot;3.76874 3.76874 3.76874 3.76874 &quot;    
+## [19] &quot;3.013626 0 0 0 &quot;                     
+## [20] &quot;4.305383 0 0 0 &quot;                     
+## [21] &quot;2.684742 2.684742 0 0 &quot;              
+## [22] &quot;3.502345 3.502345 3.502345 3.502345 &quot;
+## [23] &quot;4.080277 4.080277 0 0 &quot;              
+## [24] &quot;3.384769 0 0 0 &quot;                     
+## [25] &quot;2.684742 2.684742 0 0 &quot;              
+## [26] &quot;3.539557 0 0 0 &quot;                     
+## [27] &quot;3.342821 3.342821 3.342821 3.342821 &quot;
+## [28] &quot;3.957619 3.957619 0 0 &quot;              
+## [29] &quot;4.306794 4.306794 0 0 &quot;              
+## [30] &quot;3.951856 0 0 0 &quot;                     
+## [31] &quot;3.656462 0 3.656462 0 &quot;              
+## [32] &quot;3.181276 0 3.181276 0 &quot;              
+## [33] &quot;2.730698 2.730698 2.730698 2.730698 &quot;
+## [34] &quot;4.171651 0 0 0 &quot;                     
+## 5th RZX calculated by the code:
+##  [1] &quot;3.11495       0       0       0&quot;
+##  [2] &quot;3.16305 3.16305 3.16305 3.16305&quot;
+##  [3] &quot;3.21033       0       0       0&quot;
+##  [4] &quot;3.85929 3.85929       0       0&quot;
+##  [5] &quot;4.29337 4.29337       0       0&quot;
+##  [6] &quot;3.65646       0 3.65646       0&quot;
+##  [7] &quot;3.35899       0 3.35899       0&quot;
+##  [8] &quot;3.85266       0       0       0&quot;
+##  [9] &quot;4.27088 4.27088       0       0&quot;
+## [10] &quot; 3.6767       0       0       0&quot;
+## [11] &quot;4.03764       0       0       0&quot;
+## [12] &quot;3.72015       0 3.72015       0&quot;
+## [13] &quot;3.30015       0       0       0&quot;
+## [14] &quot;3.47414 3.47414       0       0&quot;
+## [15] &quot;4.28569       0       0       0&quot;
+## [16] &quot;4.28569       0       0       0&quot;
+## [17] &quot;3.74671 3.74671       0       0&quot;
+## [18] &quot;3.76874 3.76874 3.76874 3.76874&quot;
+## [19] &quot;3.01363       0       0       0&quot;
+## [20] &quot;4.30538       0       0       0&quot;
+## [21] &quot;2.68474 2.68474       0       0&quot;
+## [22] &quot;3.50235 3.50235 3.50235 3.50235&quot;
+## [23] &quot;4.08028 4.08028       0       0&quot;
+## [24] &quot;3.38477       0       0       0&quot;
+## [25] &quot;2.68474 2.68474       0       0&quot;
+## [26] &quot;3.53956       0       0       0&quot;
+## [27] &quot;3.34282 3.34282 3.34282 3.34282&quot;
+## [28] &quot;3.95762 3.95762       0       0&quot;
+## [29] &quot;4.30679 4.30679       0       0&quot;
+## [30] &quot;3.95186       0       0       0&quot;
+## [31] &quot;3.65646       0 3.65646       0&quot;
+## [32] &quot;3.18128       0 3.18128       0&quot;
+## [33] &quot; 2.7307  2.7307  2.7307  2.7307&quot;
+## [34] &quot;4.17165       0       0       0&quot;
+## 5th RZX calculated by hand:
+##  [1] &quot;3.11495 0 0 0 &quot;                      
+##  [2] &quot;3.163052 3.163052 3.163052 3.163052 &quot;
+##  [3] &quot;3.210326 0 0 0 &quot;                     
+##  [4] &quot;3.859287 3.859287 0 0 &quot;              
+##  [5] &quot;4.293369 4.293369 0 0 &quot;              
+##  [6] &quot;3.656462 0 3.656462 0 &quot;              
+##  [7] &quot;3.358991 0 3.358991 0 &quot;              
+##  [8] &quot;3.852659 0 0 0 &quot;                     
+##  [9] &quot;4.270885 4.270885 0 0 &quot;              
+## [10] &quot;3.676696 0 0 0 &quot;                     
+## [11] &quot;4.037635 0 0 0 &quot;                     
+## [12] &quot;3.720148 0 3.720148 0 &quot;              
+## [13] &quot;3.300151 0 0 0 &quot;                     
+## [14] &quot;3.474144 3.474144 0 0 &quot;              
+## [15] &quot;4.285692 0 0 0 &quot;                     
+## [16] &quot;4.285692 0 0 0 &quot;                     
+## [17] &quot;3.746708 3.746708 0 0 &quot;              
+## [18] &quot;3.76874 3.76874 3.76874 3.76874 &quot;    
+## [19] &quot;3.013626 0 0 0 &quot;                     
+## [20] &quot;4.305383 0 0 0 &quot;                     
+## [21] &quot;2.684742 2.684742 0 0 &quot;              
+## [22] &quot;3.502345 3.502345 3.502345 3.502345 &quot;
+## [23] &quot;4.080277 4.080277 0 0 &quot;              
+## [24] &quot;3.384769 0 0 0 &quot;                     
+## [25] &quot;2.684742 2.684742 0 0 &quot;              
+## [26] &quot;3.539557 0 0 0 &quot;                     
+## [27] &quot;3.342821 3.342821 3.342821 3.342821 &quot;
+## [28] &quot;3.957619 3.957619 0 0 &quot;              
+## [29] &quot;4.306794 4.306794 0 0 &quot;              
+## [30] &quot;3.951856 0 0 0 &quot;                     
+## [31] &quot;3.656462 0 3.656462 0 &quot;              
+## [32] &quot;3.181276 0 3.181276 0 &quot;              
+## [33] &quot;2.730698 2.730698 2.730698 2.730698 &quot;
+## [34] &quot;4.171651 0 0 0 &quot;                     
+## 6th RZX calculated by the code:
+##  [1] &quot;2.98191       0       0       0&quot;
+##  [2] &quot;2.92936 2.92936 2.92936 2.92936&quot;
+##  [3] &quot;3.06016       0       0       0&quot;
+##  [4] &quot;3.64007 3.64007       0       0&quot;
+##  [5] &quot;4.08741 4.08741       0       0&quot;
+##  [6] &quot;3.39844       0 3.39844       0&quot;
+##  [7] &quot;3.13166       0 3.13166       0&quot;
+##  [8] &quot;3.61857       0       0       0&quot;
+##  [9] &quot;4.07664 4.07664       0       0&quot;
+## [10] &quot;3.45989       0       0       0&quot;
+## [11] &quot;3.79146       0       0       0&quot;
+## [12] &quot;3.45732       0 3.45732       0&quot;
+## [13] &quot;3.13494       0       0       0&quot;
+## [14] &quot;3.30391 3.30391       0       0&quot;
+## [15] &quot;4.04787       0       0       0&quot;
+## [16] &quot;4.04787       0       0       0&quot;
+## [17] &quot;3.53969 3.53969       0       0&quot;
+## [18] &quot; 3.4799  3.4799  3.4799  3.4799&quot;
+## [19] &quot;2.90008       0       0       0&quot;
+## [20] &quot;4.08829       0       0       0&quot;
+## [21] &quot;2.67437 2.67437       0       0&quot;
+## [22] &quot;3.23074 3.23074 3.23074 3.23074&quot;
+## [23] &quot;3.84372 3.84372       0       0&quot;
+## [24] &quot;3.20634       0       0       0&quot;
+## [25] &quot;2.67437 2.67437       0       0&quot;
+## [26] &quot;3.33936       0       0       0&quot;
+## [27] &quot;3.08693 3.08693 3.08693 3.08693&quot;
+## [28] &quot;3.72943 3.72943       0       0&quot;
+## [29] &quot;4.08661 4.08661       0       0&quot;
+## [30] &quot;3.71036       0       0       0&quot;
+## [31] &quot;3.39844       0 3.39844       0&quot;
+## [32] &quot;2.97831       0 2.97831       0&quot;
+## [33] &quot;2.56979 2.56979 2.56979 2.56979&quot;
+## [34] &quot;3.92305       0       0       0&quot;
+## 6th RZX calculated by hand:
+##  [1] &quot;2.981908 0 0 0 &quot;                     
+##  [2] &quot;2.929356 2.929356 2.929356 2.929356 &quot;
+##  [3] &quot;3.060163 0 0 0 &quot;                     
+##  [4] &quot;3.640067 3.640067 0 0 &quot;              
+##  [5] &quot;4.087415 4.087415 0 0 &quot;              
+##  [6] &quot;3.39844 0 3.39844 0 &quot;                
+##  [7] &quot;3.13166 0 3.13166 0 &quot;                
+##  [8] &quot;3.618567 0 0 0 &quot;                     
+##  [9] &quot;4.076642 4.076642 0 0 &quot;              
+## [10] &quot;3.459889 0 0 0 &quot;                     
+## [11] &quot;3.791463 0 0 0 &quot;                     
+## [12] &quot;3.457318 0 3.457318 0 &quot;              
+## [13] &quot;3.134942 0 0 0 &quot;                     
+## [14] &quot;3.303908 3.303908 0 0 &quot;              
+## [15] &quot;4.04787 0 0 0 &quot;                      
+## [16] &quot;4.04787 0 0 0 &quot;                      
+## [17] &quot;3.539692 3.539692 0 0 &quot;              
+## [18] &quot;3.479896 3.479896 3.479896 3.479896 &quot;
+## [19] &quot;2.900082 0 0 0 &quot;                     
+## [20] &quot;4.088286 0 0 0 &quot;                     
+## [21] &quot;2.674372 2.674372 0 0 &quot;              
+## [22] &quot;3.230735 3.230735 3.230735 3.230735 &quot;
+## [23] &quot;3.843722 3.843722 0 0 &quot;              
+## [24] &quot;3.206342 0 0 0 &quot;                     
+## [25] &quot;2.674372 2.674372 0 0 &quot;              
+## [26] &quot;3.33936 0 0 0 &quot;                      
+## [27] &quot;3.086929 3.086929 3.086929 3.086929 &quot;
+## [28] &quot;3.72943 3.72943 0 0 &quot;                
+## [29] &quot;4.086611 4.086611 0 0 &quot;              
+## [30] &quot;3.710357 0 0 0 &quot;                     
+## [31] &quot;3.39844 0 3.39844 0 &quot;                
+## [32] &quot;2.978314 0 2.978314 0 &quot;              
+## [33] &quot;2.569792 2.569792 2.569792 2.569792 &quot;
+## [34] &quot;3.923053 0 0 0 &quot;
+</code></pre>
+
+<p>Notice that the matrices match up!</p>
+
+<p>But for the model that doesn&#39;t &#39;work&#39;:</p>
+
+<pre><code class="r">for (i in seq_along(RZX_comp)) {
+    code_lines &lt;- crabsout[code_RZXlines[RZX_comp[i], 1]:code_RZXlines[RZX_comp[i], 
+        2]]
+    hand_lines &lt;- crabsout[hand_RZXlines[i, 1]:hand_RZXlines[i, 
+        2]]
+
+    cat(int_to_ranking(i), &quot;RZX calculated by the code:\n&quot;)
+    print(code_lines)
+    cat(int_to_ranking(i), &quot;RZX calculated by hand:\n&quot;)
+    print(hand_lines)
+}
+</code></pre>
+
+<pre><code>## 1st RZX calculated by the code:
+##  [1] &quot;  1   1   0   0&quot; &quot;  1   0   0   0&quot; &quot;inf inf nan nan&quot;
+##  [4] &quot;inf inf nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+##  [7] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [10] &quot;inf nan inf nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [13] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [16] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [19] &quot;inf inf nan nan&quot; &quot;inf inf nan nan&quot; &quot;inf nan inf nan&quot;
+## [22] &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [25] &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [28] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [31] &quot;inf inf inf inf&quot; &quot;nan nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [34] &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [37] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [40] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [43] &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+## [46] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [49] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [52] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [55] &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+## [58] &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [61] &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot;
+## [64] &quot;nan nan nan nan&quot; &quot;inf nan inf nan&quot; &quot;inf nan inf nan&quot;
+## [67] &quot;inf nan inf nan&quot; &quot;nan nan nan nan&quot;
+## 1st RZX calculated by hand:
+##  [1] &quot;1.154701 0 0 0 &quot;                         
+##  [2] &quot;0.2581989 0 0 0 &quot;                        
+##  [3] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+##  [4] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+##  [5] &quot;1.154701 0 0 0 &quot;                         
+##  [6] &quot;0.2581989 0 0 0 &quot;                        
+##  [7] &quot;1.154701 1.154701 0 0 &quot;                  
+##  [8] &quot;0.2581989 0.2581989 0 0 &quot;                
+##  [9] &quot;1.154701 1.154701 0 0 &quot;                  
+## [10] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [11] &quot;1.154701 0 1.154701 0 &quot;                  
+## [12] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [13] &quot;1.154701 0 1.154701 0 &quot;                  
+## [14] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [15] &quot;1.154701 0 0 0 &quot;                         
+## [16] &quot;0.2581989 0 0 0 &quot;                        
+## [17] &quot;1.154701 1.154701 0 0 &quot;                  
+## [18] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [19] &quot;1.154701 0 0 0 &quot;                         
+## [20] &quot;0.2581989 0 0 0 &quot;                        
+## [21] &quot;1.154701 0 0 0 &quot;                         
+## [22] &quot;0.2581989 0 0 0 &quot;                        
+## [23] &quot;1.154701 0 1.154701 0 &quot;                  
+## [24] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [25] &quot;1.154701 0 0 0 &quot;                         
+## [26] &quot;0.2581989 0 0 0 &quot;                        
+## [27] &quot;1.154701 1.154701 0 0 &quot;                  
+## [28] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [29] &quot;1.154701 0 0 0 &quot;                         
+## [30] &quot;0.2581989 0 0 0 &quot;                        
+## [31] &quot;1.154701 0 0 0 &quot;                         
+## [32] &quot;0.2581989 0 0 0 &quot;                        
+## [33] &quot;1.154701 1.154701 0 0 &quot;                  
+## [34] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [35] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [36] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [37] &quot;1.154701 0 0 0 &quot;                         
+## [38] &quot;0.2581989 0 0 0 &quot;                        
+## [39] &quot;1.154701 0 0 0 &quot;                         
+## [40] &quot;0.2581989 0 0 0 &quot;                        
+## [41] &quot;1.154701 1.154701 0 0 &quot;                  
+## [42] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [43] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [44] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [45] &quot;1.154701 1.154701 0 0 &quot;                  
+## [46] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [47] &quot;1.154701 0 0 0 &quot;                         
+## [48] &quot;0.2581989 0 0 0 &quot;                        
+## [49] &quot;1.154701 1.154701 0 0 &quot;                  
+## [50] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [51] &quot;1.154701 0 0 0 &quot;                         
+## [52] &quot;0.2581989 0 0 0 &quot;                        
+## [53] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [54] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [55] &quot;1.154701 1.154701 0 0 &quot;                  
+## [56] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [57] &quot;1.154701 1.154701 0 0 &quot;                  
+## [58] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [59] &quot;1.154701 0 0 0 &quot;                         
+## [60] &quot;0.2581989 0 0 0 &quot;                        
+## [61] &quot;1.154701 0 1.154701 0 &quot;                  
+## [62] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [63] &quot;1.154701 0 1.154701 0 &quot;                  
+## [64] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [65] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [66] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [67] &quot;1.154701 0 0 0 &quot;                         
+## [68] &quot;0.2581989 0 0 0 &quot;                        
+## 2nd RZX calculated by the code:
+##  [1] &quot;  1   1   0   0&quot; &quot;  1   0   0   0&quot; &quot;inf inf nan nan&quot;
+##  [4] &quot;inf inf nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+##  [7] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [10] &quot;inf nan inf nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [13] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [16] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [19] &quot;inf inf nan nan&quot; &quot;inf inf nan nan&quot; &quot;inf nan inf nan&quot;
+## [22] &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [25] &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [28] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [31] &quot;inf inf inf inf&quot; &quot;nan nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [34] &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [37] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [40] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf inf inf inf&quot;
+## [43] &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+## [46] &quot;nan nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [49] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [52] &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;nan nan nan nan&quot;
+## [55] &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot; &quot;nan nan nan nan&quot;
+## [58] &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot; &quot;inf nan nan nan&quot;
+## [61] &quot;inf nan nan nan&quot; &quot;nan nan nan nan&quot; &quot;inf inf nan nan&quot;
+## [64] &quot;nan nan nan nan&quot; &quot;inf nan inf nan&quot; &quot;inf nan inf nan&quot;
+## [67] &quot;inf nan inf nan&quot; &quot;nan nan nan nan&quot;
+## 2nd RZX calculated by hand:
+##  [1] &quot;1.154701 0 0 0 &quot;                         
+##  [2] &quot;0.2581989 0 0 0 &quot;                        
+##  [3] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+##  [4] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+##  [5] &quot;1.154701 0 0 0 &quot;                         
+##  [6] &quot;0.2581989 0 0 0 &quot;                        
+##  [7] &quot;1.154701 1.154701 0 0 &quot;                  
+##  [8] &quot;0.2581989 0.2581989 0 0 &quot;                
+##  [9] &quot;1.154701 1.154701 0 0 &quot;                  
+## [10] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [11] &quot;1.154701 0 1.154701 0 &quot;                  
+## [12] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [13] &quot;1.154701 0 1.154701 0 &quot;                  
+## [14] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [15] &quot;1.154701 0 0 0 &quot;                         
+## [16] &quot;0.2581989 0 0 0 &quot;                        
+## [17] &quot;1.154701 1.154701 0 0 &quot;                  
+## [18] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [19] &quot;1.154701 0 0 0 &quot;                         
+## [20] &quot;0.2581989 0 0 0 &quot;                        
+## [21] &quot;1.154701 0 0 0 &quot;                         
+## [22] &quot;0.2581989 0 0 0 &quot;                        
+## [23] &quot;1.154701 0 1.154701 0 &quot;                  
+## [24] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [25] &quot;1.154701 0 0 0 &quot;                         
+## [26] &quot;0.2581989 0 0 0 &quot;                        
+## [27] &quot;1.154701 1.154701 0 0 &quot;                  
+## [28] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [29] &quot;1.154701 0 0 0 &quot;                         
+## [30] &quot;0.2581989 0 0 0 &quot;                        
+## [31] &quot;1.154701 0 0 0 &quot;                         
+## [32] &quot;0.2581989 0 0 0 &quot;                        
+## [33] &quot;1.154701 1.154701 0 0 &quot;                  
+## [34] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [35] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [36] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [37] &quot;1.154701 0 0 0 &quot;                         
+## [38] &quot;0.2581989 0 0 0 &quot;                        
+## [39] &quot;1.154701 0 0 0 &quot;                         
+## [40] &quot;0.2581989 0 0 0 &quot;                        
+## [41] &quot;1.154701 1.154701 0 0 &quot;                  
+## [42] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [43] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [44] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [45] &quot;1.154701 1.154701 0 0 &quot;                  
+## [46] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [47] &quot;1.154701 0 0 0 &quot;                         
+## [48] &quot;0.2581989 0 0 0 &quot;                        
+## [49] &quot;1.154701 1.154701 0 0 &quot;                  
+## [50] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [51] &quot;1.154701 0 0 0 &quot;                         
+## [52] &quot;0.2581989 0 0 0 &quot;                        
+## [53] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [54] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [55] &quot;1.154701 1.154701 0 0 &quot;                  
+## [56] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [57] &quot;1.154701 1.154701 0 0 &quot;                  
+## [58] &quot;0.2581989 0.2581989 0 0 &quot;                
+## [59] &quot;1.154701 0 0 0 &quot;                         
+## [60] &quot;0.2581989 0 0 0 &quot;                        
+## [61] &quot;1.154701 0 1.154701 0 &quot;                  
+## [62] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [63] &quot;1.154701 0 1.154701 0 &quot;                  
+## [64] &quot;0.2581989 0 0.2581989 0 &quot;                
+## [65] &quot;1.154701 1.154701 1.154701 1.154701 &quot;    
+## [66] &quot;0.2581989 0.2581989 0.2581989 0.2581989 &quot;
+## [67] &quot;1.154701 0 0 0 &quot;                         
+## [68] &quot;0.2581989 0 0 0 &quot;                        
+## 3rd RZX calculated by the code:
+##  [1] &quot;6.33873 6.33873       0       0&quot;
+##  [2] &quot;10.4101       0       0       0&quot;
+##  [3] &quot;   -inf     inf     nan     nan&quot;
+##  [4] &quot;    inf     inf     nan     nan&quot;
+##  [5] &quot;    inf     inf     nan     nan&quot;
+##  [6] &quot;    nan     nan     nan     nan&quot;
+##  [7] &quot;    nan     nan     nan     nan&quot;
+##  [8] &quot;    nan     nan     nan     nan&quot;
+##  [9] &quot;    nan     nan     nan     nan&quot;
+## [10] &quot;    inf     nan     inf     nan&quot;
+## [11] &quot;    nan     nan     nan     nan&quot;
+## [12] &quot;    nan     nan     nan     nan&quot;
+## [13] &quot;    nan     nan     nan     nan&quot;
+## [14] &quot;    nan     nan     nan     nan&quot;
+## [15] &quot;    nan     nan     nan     nan&quot;
+## [16] &quot;    nan     nan     nan     nan&quot;
+## [17] &quot;    inf     nan     nan     nan&quot;
+## [18] &quot;    nan     nan     nan     nan&quot;
+## [19] &quot;    inf     inf     nan     nan&quot;
+## [20] &quot;    inf     inf     nan     nan&quot;
+## [21] &quot;    inf     nan     inf     nan&quot;
+## [22] &quot;    inf     nan     nan     nan&quot;
+## [23] &quot;    inf     nan     nan     nan&quot;
+## [24] &quot;    inf     nan     nan     nan&quot;
+## [25] &quot;    inf     nan     nan     nan&quot;
+## [26] &quot;    nan     nan     nan     nan&quot;
+## [27] &quot;    inf     inf     inf     inf&quot;
+## [28] &quot;    nan     nan     nan     nan&quot;
+## [29] &quot;    nan     nan     nan     nan&quot;
+## [30] &quot;    nan     nan     nan     nan&quot;
+## [31] &quot;    inf     inf     inf     inf&quot;
+## [32] &quot;    nan     nan     nan     nan&quot;
+## [33] &quot;    inf     inf     inf     inf&quot;
+## [34] &quot;    inf     inf     nan     nan&quot;
+## [35] &quot;    nan     nan     nan     nan&quot;
+## [36] &quot;    inf     nan     nan     nan&quot;
+## [37] &quot;    nan     nan     nan     nan&quot;
+## [38] &quot;    nan     nan     nan     nan&quot;
+## [39] &quot;    nan     nan     nan     nan&quot;
+## [40] &quot;    nan     nan     nan     nan&quot;
+## [41] &quot;    inf     nan     nan     nan&quot;
+## [42] &quot;    inf     inf     inf     inf&quot;
+## [43] &quot;    nan     nan     nan     nan&quot;
+## [44] &quot;    inf     inf     nan     nan&quot;
+## [45] &quot;    nan     nan     nan     nan&quot;
+## [46] &quot;    nan     nan     nan     nan&quot;
+## [47] &quot;    inf     nan     nan     nan&quot;
+## [48] &quot;    nan     nan     nan     nan&quot;
+## [49] &quot;    nan     nan     nan     nan&quot;
+## [50] &quot;    nan     nan     nan     nan&quot;
+## [51] &quot;    nan     nan     nan     nan&quot;
+## [52] &quot;    nan     nan     nan     nan&quot;
+## [53] &quot;    nan     nan     nan     nan&quot;
+## [54] &quot;    nan     nan     nan     nan&quot;
+## [55] &quot;    nan     nan     nan     nan&quot;
+## [56] &quot;    inf     inf     nan     nan&quot;
+## [57] &quot;    nan     nan     nan     nan&quot;
+## [58] &quot;    inf     nan     nan     nan&quot;
+## [59] &quot;    inf     nan     nan     nan&quot;
+## [60] &quot;    inf     nan     nan     nan&quot;
+## [61] &quot;    inf     nan     nan     nan&quot;
+## [62] &quot;    nan     nan     nan     nan&quot;
+## [63] &quot;    inf     inf     nan     nan&quot;
+## [64] &quot;    nan     nan     nan     nan&quot;
+## [65] &quot;    inf     nan     inf     nan&quot;
+## [66] &quot;    inf     nan     inf     nan&quot;
+## [67] &quot;    inf     nan     inf     nan&quot;
+## [68] &quot;    nan     nan     nan     nan&quot;
+## 3rd RZX calculated by hand:
+##  [1] &quot;3.092176 0 0 0 &quot;                         
+##  [2] &quot;0.3985472 0 0 0 &quot;                        
+##  [3] &quot;3.142056 3.142056 3.142056 3.142056 &quot;    
+##  [4] &quot;0.4707575 0.4707575 0.4707575 0.4707575 &quot;
+##  [5] &quot;3.208726 0 0 0 &quot;                         
+##  [6] &quot;0.3553172 0 0 0 &quot;                        
+##  [7] &quot;3.622939 3.622939 0 0 &quot;                  
+##  [8] &quot;0.4877575 0.4877575 0 0 &quot;                
+##  [9] &quot;2.80634 2.80634 0 0 &quot;                    
+## [10] &quot;0.5662936 0.5662936 0 0 &quot;                
+## [11] &quot;3.431056 0 3.431056 0 &quot;                  
+## [12] &quot;0.5868375 0 0.5868375 0 &quot;                
+## [13] &quot;3.293551 0 3.293551 0 &quot;                  
+## [14] &quot;0.4768235 0 0.4768235 0 &quot;                
+## [15] &quot;3.852142 0 0 0 &quot;                         
+## [16] &quot;0.3234111 0 0 0 &quot;                        
+## [17] &quot;2.572657 2.572657 0 0 &quot;                  
+## [18] &quot;0.5553783 0.5553783 0 0 &quot;                
+## [19] &quot;3.584691 0 0 0 &quot;                         
+## [20] &quot;0.4202943 0 0 0 &quot;                        
+## [21] &quot;3.575602 0 0 0 &quot;                         
+## [22] &quot;0.5903286 0 0 0 &quot;                        
+## [23] &quot;3.726576 0 3.726576 0 &quot;                  
+## [24] &quot;0.344592 0 0.344592 0 &quot;                  
+## [25] &quot;3.156858 0 0 0 &quot;                         
+## [26] &quot;0.5790683 0 0 0 &quot;                        
+## [27] &quot;3.475343 3.475343 0 0 &quot;                  
+## [28] &quot;0.3331901 0.3331901 0 0 &quot;                
+## [29] &quot;4.161681 0 0 0 &quot;                         
+## [30] &quot;0.2995525 0 0 0 &quot;                        
+## [31] &quot;4.094909 0 0 0 &quot;                         
+## [32] &quot;0.3125866 0 0 0 &quot;                        
+## [33] &quot;3.685978 3.685978 0 0 &quot;                  
+## [34] &quot;0.3774707 0.3774707 0 0 &quot;                
+## [35] &quot;3.592848 3.592848 3.592848 3.592848 &quot;    
+## [36] &quot;0.4868684 0.4868684 0.4868684 0.4868684 &quot;
+## [37] &quot;3.00552 0 0 0 &quot;                          
+## [38] &quot;0.3427401 0 0 0 &quot;                        
+## [39] &quot;4.301018 0 0 0 &quot;                         
+## [40] &quot;0.2710964 0 0 0 &quot;                        
+## [41] &quot;2.610135 2.610135 0 0 &quot;                  
+## [42] &quot;0.4419442 0.4419442 0 0 &quot;                
+## [43] &quot;3.520261 3.520261 3.520261 3.520261 &quot;    
+## [44] &quot;0.3707367 0.3707367 0.3707367 0.3707367 &quot;
+## [45] &quot;3.800376 3.800376 0 0 &quot;                  
+## [46] &quot;0.4274583 0.4274583 0 0 &quot;                
+## [47] &quot;3.352115 0 0 0 &quot;                         
+## [48] &quot;0.2583327 0 0 0 &quot;                        
+## [49] &quot;2.610135 2.610135 0 0 &quot;                  
+## [50] &quot;0.4419442 0.4419442 0 0 &quot;                
+## [51] &quot;3.417417 0 0 0 &quot;                         
+## [52] &quot;0.4812641 0 0 0 &quot;                        
+## [53] &quot;3.293551 3.293551 3.293551 3.293551 &quot;    
+## [54] &quot;0.4768235 0.4768235 0.4768235 0.4768235 &quot;
+## [55] &quot;3.66762 3.66762 0 0 &quot;                    
+## [56] &quot;0.4890416 0.4890416 0 0 &quot;                
+## [57] &quot;3.477113 3.477113 0 0 &quot;                  
+## [58] &quot;0.416256 0.416256 0 0 &quot;                  
+## [59] &quot;3.66762 0 0 0 &quot;                          
+## [60] &quot;0.4890416 0 0 0 &quot;                        
+## [61] &quot;3.431056 0 3.431056 0 &quot;                  
+## [62] &quot;0.5868375 0 0.5868375 0 &quot;                
+## [63] &quot;3.142056 0 3.142056 0 &quot;                  
+## [64] &quot;0.4707575 0 0.4707575 0 &quot;                
+## [65] &quot;2.737703 2.737703 2.737703 2.737703 &quot;    
+## [66] &quot;0.4501647 0.4501647 0.4501647 0.4501647 &quot;
+## [67] &quot;4.189537 0 0 0 &quot;                         
+## [68] &quot;0.273113 0 0 0 &quot;
+</code></pre>
+
+<p>The matrices don&#39;t match up.</p>
+
+</body>
+
+</html>
+
