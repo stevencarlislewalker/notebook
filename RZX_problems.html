@@ -184,6 +184,210 @@ hljs.initHighlightingOnLoad();
 <body>
 <h1>Illustrating trouble with <code>RZX</code> in development <code>lme4</code> </h1>
 
+<h2>Executive summary</h2>
+
+<p><em>Warning:</em>  This is a long document.  All that may be needed is what appears in this short summary &ndash; read the following sections for reference as needed.</p>
+
+<p>If we fit these <a href="https://github.com/stevencarlislewalker/lme4/blob/master/testsx/crabs_randdata00.Rda">data</a>,</p>
+
+<pre><code class="r">head(randdata00)
+</code></pre>
+
+<pre><code>##   final.snail.density snails.lost crab.speciesS crab.sizeS snail.size plot
+## 1                  43          10             0          0          S    8
+## 2                  27          26             0          0          S   25
+## 3                  45           8             0          0          S   39
+## 4                  37          16             0          0          S   48
+## 5                  22           3             0          0          L    8
+## 6                  25           0             0          0          L   25
+</code></pre>
+
+<p>to this model,</p>
+
+<pre><code class="r">fr &lt;- cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + crab.speciesS:crab.sizeS + (snail.size | plot)
+err &lt;- try(glmer(fr, data = randdata00, family = binomial))
+</code></pre>
+
+<p>we get this error,</p>
+
+<pre><code class="r">err
+</code></pre>
+
+<pre><code>## [1] &quot;Error in glmer(fr, data = randdata00, family = binomial) : \n  pwrssUpdate did not converge in 30 iterations\n&quot;
+## attr(,&quot;class&quot;)
+## [1] &quot;try-error&quot;
+## attr(,&quot;condition&quot;)
+## &lt;std::runtime_error in glmer(fr, data = randdata00, family = binomial): pwrssUpdate did not converge in 30 iterations&gt;
+</code></pre>
+
+<p>We found that the trouble begins in this code snipet of <code>predModule.cpp</code> (note added debugging statements),</p>
+
+<pre><code class="r">cat(scan(&quot;~/Development/lme4/src/predModule.cpp&quot;, &quot;character&quot;, sep = &quot;\n&quot;)[206:213], sep = &quot;\n&quot;)
+</code></pre>
+
+<pre><code>##     void merPredD::updateDecomp() { // update L, RZX and RX
+##   updateL();
+##  d_RZX         = d_LamtUt * d_V; // the d_RZX object contains UtV at this point
+##   Rcpp::Rcout &lt;&lt; &quot;UtV:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
+##  if (d_p &gt; 0) {
+##      d_L.solveInPlace(d_RZX, CHOLMOD_P);
+##      d_L.solveInPlace(d_RZX, CHOLMOD_L); // now d_RZX actually contains RZX
+##       Rcpp::Rcout &lt;&lt; &quot;RZX:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
+</code></pre>
+
+<p>And here is the problem occurring in action (note the added debugging argument <code>stopearly</code> for stopping after the first computation of <code>RZX</code>),</p>
+
+<pre><code class="r">glmer(fr, data = randdata00, family = binomial, stopearly = TRUE)
+</code></pre>
+
+<pre><code>## UtV:
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 2 2
+## 1 1 1 1
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 2 0
+## 1 0 1 0
+## 2 0 2 0
+## 1 0 1 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 0 2 0
+## 1 0 1 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 2 2 2
+## 1 1 1 1
+## 2 0 0 0
+## 1 0 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 2 2 2
+## 1 1 1 1
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 2 2 2
+## 1 1 1 1
+## 2 2 0 0
+## 1 1 0 0
+## 2 2 0 0
+## 1 1 0 0
+## 2 0 0 0
+## 1 0 0 0
+## 2 0 2 0
+## 1 0 1 0
+## 2 0 2 0
+## 1 0 1 0
+## 2 2 2 2
+## 1 1 1 1
+## 2 0 0 0
+## 1 0 0 0
+## RZX:
+##   1   1   0   0
+##   1   0   0   0
+## inf inf nan nan
+## inf inf nan nan
+## inf inf nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf nan inf nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf nan nan nan
+## nan nan nan nan
+## inf inf nan nan
+## inf inf nan nan
+## inf nan inf nan
+## inf nan nan nan
+## inf nan nan nan
+## inf nan nan nan
+## inf nan nan nan
+## nan nan nan nan
+## inf inf inf inf
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf inf inf inf
+## nan nan nan nan
+## inf inf inf inf
+## inf inf nan nan
+## nan nan nan nan
+## inf nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf nan nan nan
+## inf inf inf inf
+## nan nan nan nan
+## inf inf nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## nan nan nan nan
+## inf inf nan nan
+## nan nan nan nan
+## inf nan nan nan
+## inf nan nan nan
+## inf nan nan nan
+## inf nan nan nan
+## nan nan nan nan
+## inf inf nan nan
+## nan nan nan nan
+## inf nan inf nan
+## inf nan inf nan
+## inf nan inf nan
+## nan nan nan nan
+</code></pre>
+
+<pre><code>## NULL
+</code></pre>
+
+<p>Additional points:
+1. This example works on <code>lme4.0</code> so its not that the model is impossible.
+2. We can calculate the troubling <code>RZX</code> matrix &#39;by hand&#39; (i.e. using the <code>Matrix</code> package in native R).
+Evidence of this second point is given below.</p>
+
 <h2>What is <code>RZX</code>?</h2>
 
 <p>A <a href="https://github.com/lme4/lme4">development version</a> of the <code>lme4</code> package iteratively uses block <a href="http://en.wikipedia.org/wiki/Cholesky_decomposition">Cholesky</a> decompositions for fitting generalized linear mixed models.  In particular, the block matrix that is Cholesky decomposed is defined by,
@@ -298,29 +502,29 @@ randdata00
 <p>Here we compare two model fits to these data, one that fails to properly compute <code>RZX</code> and one that doesn&#39;t.  These two source files fit these two models (the first one works, the second doesn&#39;t):</p>
 
 <pre><code class="r">options(width = 100)
-scan(&quot;crabs_simpler.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+cat(scan(&quot;crabs_simpler.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;), sep = &quot;\n&quot;)
 </code></pre>
 
-<pre><code>## [1] &quot;library(lme4)&quot;                                                            
-## [2] &quot;setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)&quot;             
-## [3] &quot;load(&#39;crabs_randdata00.Rda&#39;)&quot;                                             
-## [4] &quot;fr &lt;- &quot;                                                                   
-## [5] &quot;  cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + &quot;
-## [6] &quot;  crab.speciesS:crab.sizeS + (1 | plot)&quot;                                  
-## [7] &quot;options(width = 200)&quot;                                                     
-## [8] &quot;glmer(fr, data = randdata00, family = &#39;binomial&#39;)&quot;
+<pre><code>## library(lme4)
+## setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)
+## load(&#39;crabs_randdata00.Rda&#39;)
+## fr &lt;- 
+##   cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + 
+##   crab.speciesS:crab.sizeS + (1 | plot)
+## options(width = 200)
+## glmer(fr, data = randdata00, family = &#39;binomial&#39;, byhand = TRUE)
 </code></pre>
 
-<pre><code class="r">scan(&quot;crabs.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
+<pre><code class="r">cat(scan(&quot;crabs.R&quot;, &quot;character&quot;, sep = &quot;\n&quot;), sep = &quot;\n&quot;)
 </code></pre>
 
-<pre><code>## [1] &quot;library(lme4)&quot;                                                            
-## [2] &quot;setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)&quot;             
-## [3] &quot;load(&#39;crabs_randdata00.Rda&#39;)&quot;                                             
-## [4] &quot;fr &lt;- &quot;                                                                   
-## [5] &quot;  cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + &quot;
-## [6] &quot;  crab.speciesS:crab.sizeS + (snail.size | plot)&quot;                         
-## [7] &quot;glmer(fr, data = randdata00, family = &#39;binomial&#39;)&quot;
+<pre><code>## library(lme4)
+## setwd(&#39;~/Development/lme4_experimentation/nailing_down_RZX&#39;)
+## load(&#39;crabs_randdata00.Rda&#39;)
+## fr &lt;- 
+##   cbind(final.snail.density, snails.lost) ~ crab.speciesS + crab.sizeS + 
+##   crab.speciesS:crab.sizeS + (snail.size | plot)
+## glmer(fr, data = randdata00, family = &#39;binomial&#39;, byhand = TRUE)
 </code></pre>
 
 <p>The only difference between the two models is that one has a random intercept and the other a random <code>snail.size</code> effect.</p>
@@ -374,11 +578,11 @@ err &lt;- try(source(&quot;crabs.R&quot;))
 <pre><code class="r">print(err)
 </code></pre>
 
-<pre><code>## [1] &quot;Error in glmer(fr, data = randdata00, family = \&quot;binomial\&quot;) : \n  pwrssUpdate did not converge in 30 iterations\n&quot;
+<pre><code>## [1] &quot;Error in glmer(fr, data = randdata00, family = \&quot;binomial\&quot;, byhand = TRUE) : \n  pwrssUpdate did not converge in 30 iterations\n&quot;
 ## attr(,&quot;class&quot;)
 ## [1] &quot;try-error&quot;
 ## attr(,&quot;condition&quot;)
-## &lt;std::runtime_error in glmer(fr, data = randdata00, family = &quot;binomial&quot;): pwrssUpdate did not converge in 30 iterations&gt;
+## &lt;std::runtime_error in glmer(fr, data = randdata00, family = &quot;binomial&quot;, byhand = TRUE): pwrssUpdate did not converge in 30 iterations&gt;
 </code></pre>
 
 <h2>Modifications to <code>lme4</code> for debugging purposes</h2>
@@ -387,8 +591,12 @@ err &lt;- try(source(&quot;crabs.R&quot;))
 
 <pre><code>void merPredD::updateDecomp() { // update L, RZX and RX
   updateL();
-  d_RZX         = d_LamtUt * d_V;
-  Rcpp::Rcout &lt;&lt; &quot;RZX:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
+  d_RZX         = d_LamtUt * d_V; // the d_RZX object contains UtV at this point
+  Rcpp::Rcout &lt;&lt; &quot;UtV:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
+    if (d_p &gt; 0) {
+        d_L.solveInPlace(d_RZX, CHOLMOD_P);
+        d_L.solveInPlace(d_RZX, CHOLMOD_L); // now d_RZX actually contains RZX
+      Rcpp::Rcout &lt;&lt; &quot;RZX:\n&quot; &lt;&lt; d_RZX &lt;&lt; std::endl;
 </code></pre>
 
 <p>The modification is the final line in this snipet, which prints out the <code>RZX</code> matrix everytime it is computed.</p>
@@ -408,10 +616,10 @@ RZXhand &lt;- RZXbyhand(pp = pp_byhand, resp = resp_byhand, includeH = FALSE)
 <pre><code class="r">lme4:::RZXbyhand
 </code></pre>
 
-<pre><code>## function (pp, resp, includeH = TRUE) 
+<pre><code>## function (pp, resp, includeWinv = TRUE) 
 ## {
 ##     LambdatZt &lt;- pp$Lambdat %*% pp$Zt
-##     if (includeH) 
+##     if (includeWinv) 
 ##         Winv &lt;- diag(resp$n * resp$mu * (1 - resp$mu), length(resp$mu), 
 ##             length(resp$mu))
 ##     else Winv &lt;- diag(1, ncol(LambdatZt), ncol(LambdatZt))
@@ -524,9 +732,9 @@ system(&quot;R CMD BATCH crabs.R&quot;)
 crabsout &lt;- scan(&quot;crabs.Rout&quot;, &quot;character&quot;, sep = &quot;\n&quot;)
 </code></pre>
 
-<h2><code>grep</code>ing the printouts of the <code>RZX</code> matrices</h2>
+<h2><code>grep</code>ping the printouts of the <code>RZX</code> matrices</h2>
 
-<p>Some ugly <code>grep</code>ing:</p>
+<p>Some ugly <code>grep</code>ping:</p>
 
 <pre><code class="r">code_RZXlines &lt;- outer(grep(&quot;RZX:&quot;, crabsout), c(1, 68), &quot;+&quot;)
 hand_RZXlines &lt;- outer(grep(&quot;by hand&quot;, crabsout), c(1, 68), &quot;+&quot;)
