@@ -361,6 +361,9 @@ system of equations A * X = B.</p>
 <pre><code>## Loading required package: RcppEigen
 </code></pre>
 
+<pre><code>## Error: package/namespace load failed for &#39;lme4&#39;
+</code></pre>
+
 <pre><code class="r">set.seed(1)
 options(width = 100)
 </code></pre>
@@ -400,19 +403,15 @@ f &lt;- c(&quot;b&quot;, &quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&qu
 <pre><code class="r">fm_df_glmer &lt;- glmer_form_parse(fm, df)
 </code></pre>
 
+<pre><code>## Error: could not find function &quot;glmer_form_parse&quot;
+</code></pre>
+
 <p>This <code>fm_df_glmer</code> object contains many objects required to fit the model to the data.  The first things are the design matrices&mdash;the transpose of the random effects design matrix, \( \mathbf Z^\top \),</p>
 
 <pre><code class="r">(Zt &lt;- fm_df_glmer$reTrms$Zt)
 </code></pre>
 
-<pre><code>## 6 x 10 sparse Matrix of class &quot;dgCMatrix&quot;
-##                                                                               
-## a .     1.0000  1.00000  1.000 .       1.00000  .        .       .      1.0000
-## a .     0.3898 -0.62124 -2.215 .      -0.04493  .        .       .      0.5939
-## a .     0.7821  0.07456 -1.989 .      -0.05613  .        .       .      0.4179
-## b 1.000 .       .        .     1.0000  .        1.00000  1.0000  1.0000 .     
-## b 1.512 .       .        .     1.1249  .       -0.01619  0.9438  0.8212 .     
-## b 0.919 .       .        .     0.6198  .       -0.15580 -1.4708 -0.4782 .
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>and the fixed effects design matrix, \( \mathbf X \),</p>
@@ -420,19 +419,7 @@ f &lt;- c(&quot;b&quot;, &quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&qu
 <pre><code class="r">(X &lt;- fm_df_glmer$X)
 </code></pre>
 
-<pre><code>##    (Intercept)       V1       V2
-## 1            1  1.51178  0.91898
-## 2            1  0.38984  0.78214
-## 3            1 -0.62124  0.07456
-## 4            1 -2.21470 -1.98935
-## 5            1  1.12493  0.61983
-## 6            1 -0.04493 -0.05613
-## 7            1 -0.01619 -0.15580
-## 8            1  0.94384 -1.47075
-## 9            1  0.82122 -0.47815
-## 10           1  0.59390  0.41794
-## attr(,&quot;assign&quot;)
-## [1] 0 1 2
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>There are several matrix products that both are used often in the fitting proceedure and are functions of the data only.  Therefore, we compute these upfront,</p>
@@ -440,7 +427,15 @@ f &lt;- c(&quot;b&quot;, &quot;a&quot;, &quot;a&quot;, &quot;a&quot;, &quot;b&qu
 <pre><code class="r">XtX &lt;- t(X) %*% X
 Xty &lt;- t(X) %*% y
 ZtX &lt;- Zt %*% X
-Zty &lt;- Zt %*% y
+</code></pre>
+
+<pre><code>## Error: object &#39;Zt&#39; not found
+</code></pre>
+
+<pre><code class="r">Zty &lt;- Zt %*% y
+</code></pre>
+
+<pre><code>## Error: object &#39;Zt&#39; not found
 </code></pre>
 
 <p>Another object in <code>gm_df_glmer</code> is <code>theta</code>, corresponding to \( \theta \), which contains the initial values for the variance component parameters,</p>
@@ -448,7 +443,7 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">(theta &lt;- fm_df_glmer$reTrms$theta)
 </code></pre>
 
-<pre><code>## [1] 1 0 0 1 0 1
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>The meaning of these variance component parameter is somewhat difficult to understand.  Essentially, they fill in certain elements of the \( \Lambda_\theta^\top \) matrix,</p>
@@ -456,14 +451,7 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">(Lambdat &lt;- fm_df_glmer$reTrms$Lambdat)
 </code></pre>
 
-<pre><code>## 6 x 6 sparse Matrix of class &quot;dgCMatrix&quot;
-##                 
-## [1,] 1 0 0 . . .
-## [2,] . 1 0 . . .
-## [3,] . . 1 . . .
-## [4,] . . . 1 0 0
-## [5,] . . . . 1 0
-## [6,] . . . . . 1
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>From a theoretical point of view this <code>Lambdat</code> matrix is a square root of the covariance matrix of the random effects.  From a computational point of view, this <code>Lambdat</code> matrix is a little different from other <code>R</code> matrices, in that it is a <strong>sparse</strong> matrix of class <code>dgCMatrix</code>. See documentation on the <code>Matrix</code> package for more information on this class.  The key piece of information for our purposes is that there is a slot that contains the non-zero values,</p>
@@ -471,7 +459,7 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">Lambdat@x
 </code></pre>
 
-<pre><code>##  [1] 1 0 1 0 0 1 1 0 1 0 0 1
+<pre><code>## Error: object &#39;Lambdat&#39; not found
 </code></pre>
 
 <p>The information on where to put these numbers in the matrix itself is stored in other slots called <code>i</code> and <code>p</code>.  However, we don&#39;t need to really worry about how this works.  We can calculate <code>Lambdat@x</code> manually by using another element of <code>rt</code>,</p>
@@ -479,7 +467,7 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">(Lind &lt;- fm_df_glmer$reTrms$Lind)
 </code></pre>
 
-<pre><code>##  [1] 1 2 4 3 5 6 1 2 4 3 5 6
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>This vector contains the indices required to convert <code>theta</code> to <code>Lambdat@x</code>,</p>
@@ -487,7 +475,7 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">theta[Lind]
 </code></pre>
 
-<pre><code>##  [1] 1 0 1 0 0 1 1 0 1 0 0 1
+<pre><code>## Error: object &#39;theta&#39; not found
 </code></pre>
 
 <p>Note that this result is identical to <code>Lambdat@x</code>.  This is not a coincidence.  This manual updating will come in handy during the model fitting proceedure.</p>
@@ -497,35 +485,25 @@ Zty &lt;- Zt %*% y
 <pre><code class="r">(Gp &lt;- fm_df_glmer$reTrms$Gp)
 </code></pre>
 
-<pre><code>## [1] 0 6
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <pre><code class="r">(lower &lt;- fm_df_glmer$reTrms$lower)
 </code></pre>
 
-<pre><code>## [1]    0 -Inf -Inf    0 -Inf    0
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <pre><code class="r">(flist &lt;- fm_df_glmer$reTrms$flist)
 </code></pre>
 
-<pre><code>##    f
-## 1  b
-## 2  a
-## 3  a
-## 4  a
-## 5  b
-## 6  a
-## 7  b
-## 8  b
-## 9  b
-## 10 a
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <pre><code class="r">(f &lt;- fm_df_glmer$reTrms$cnms$f)
 </code></pre>
 
-<pre><code>## [1] &quot;(Intercept)&quot; &quot;V1&quot;          &quot;V2&quot;
+<pre><code>## Error: object &#39;fm_df_glmer&#39; not found
 </code></pre>
 
 <p>OK so that takes care of \( \mathbf Z, \mathbf X \), and \( \Lambda_\theta \).  Another simple one is \( y_\mathrm{obs} \), which are the response data,</p>
@@ -570,6 +548,8 @@ Zty &lt;- Zt %*% y
 </ol>
 
 <h2>Fill-reducing permutations:  they don&#39;t always help</h2>
+
+<p>Trick in lme4 is to save the permutation matrix once and then repeat over iterations of the algorithms.</p>
 
 <p>Here&#39;s a little demonstration of what I learned <a href="http://www.ee.ucla.edu/%7Evandenbe/103/lectures/chol.pdf">here</a>.</p>
 
@@ -653,52 +633,27 @@ image(Lp2)
 <pre><code class="r">(Ut &lt;- Lambdat %*% Zt)
 </code></pre>
 
-<pre><code>## 6 x 10 sparse Matrix of class &quot;dgCMatrix&quot;
-##                                                                                  
-## [1,] .     1.0000  1.00000  1.000 .       1.00000  .        .       .      1.0000
-## [2,] .     0.3898 -0.62124 -2.215 .      -0.04493  .        .       .      0.5939
-## [3,] .     0.7821  0.07456 -1.989 .      -0.05613  .        .       .      0.4179
-## [4,] 1.000 .       .        .     1.0000  .        1.00000  1.0000  1.0000 .     
-## [5,] 1.512 .       .        .     1.1249  .       -0.01619  0.9438  0.8212 .     
-## [6,] 0.919 .       .        .     0.6198  .       -0.15580 -1.4708 -0.4782 .
+<pre><code>## Error: object &#39;Lambdat&#39; not found
 </code></pre>
 
 <pre><code class="r">(Lp &lt;- Cholesky(Ut %*% t(Ut), perm = TRUE, LDL = FALSE, Imult = 1))
 </code></pre>
 
-<pre><code>## &#39;MatrixFactorization&#39; of Formal class &#39;dCHMsimpl&#39; [package &quot;Matrix&quot;] with 10 slots
-##   ..@ x       : num [1:12] 2.449 -0.774 -0.315 2.49 1.876 ...
-##   ..@ p       : int [1:7] 0 3 5 6 9 11 12
-##   ..@ i       : int [1:12] 0 1 2 1 2 2 3 4 5 4 ...
-##   ..@ nz      : int [1:6] 3 2 1 3 2 1
-##   ..@ nxt     : int [1:8] 1 2 3 4 5 6 -1 0
-##   ..@ prv     : int [1:8] 7 0 1 2 3 4 5 -1
-##   ..@ colcount: int [1:6] 3 2 1 3 2 1
-##   ..@ perm    : int [1:6] 0 1 2 3 4 5
-##   ..@ type    : int [1:4] 2 1 0 1
-##   ..@ Dim     : int [1:2] 6 6
+<pre><code>## Error: error in evaluating the argument &#39;A&#39; in selecting a method for function &#39;Cholesky&#39;: Error:
+## object &#39;Ut&#39; not found
 </code></pre>
 
 <pre><code class="r">(Lnp &lt;- Cholesky(Ut %*% t(Ut), perm = FALSE, LDL = FALSE, Imult = 1))
 </code></pre>
 
-<pre><code>## &#39;MatrixFactorization&#39; of Formal class &#39;dCHMsimpl&#39; [package &quot;Matrix&quot;] with 10 slots
-##   ..@ x       : num [1:12] 2.449 -0.774 -0.315 2.49 1.876 ...
-##   ..@ p       : int [1:7] 0 3 5 6 9 11 12
-##   ..@ i       : int [1:12] 0 1 2 1 2 2 3 4 5 4 ...
-##   ..@ nz      : int [1:6] 3 2 1 3 2 1
-##   ..@ nxt     : int [1:8] 1 2 3 4 5 6 -1 0
-##   ..@ prv     : int [1:8] 7 0 1 2 3 4 5 -1
-##   ..@ colcount: int [1:6] 3 2 1 3 2 1
-##   ..@ perm    : int [1:6] 0 1 2 3 4 5
-##   ..@ type    : int [1:4] 0 1 0 1
-##   ..@ Dim     : int [1:2] 6 6
+<pre><code>## Error: error in evaluating the argument &#39;A&#39; in selecting a method for function &#39;Cholesky&#39;: Error:
+## object &#39;Ut&#39; not found
 </code></pre>
 
 <pre><code class="r">identical(Lp, Lnp)
 </code></pre>
 
-<pre><code>## [1] FALSE
+<pre><code>## Error: object &#39;Lp&#39; not found
 </code></pre>
 
 <pre><code class="r">update(L, Ut, mult = 1)
@@ -717,13 +672,9 @@ image(Lp2)
 <pre><code class="r">chol(as.matrix(Ut %*% t(Ut)) + diag(1, nrow(Ut), nrow(Ut)))
 </code></pre>
 
-<pre><code>##       [,1]    [,2]    [,3]  [,4]  [,5]    [,6]
-## [1,] 2.449 -0.7745 -0.3147 0.000 0.000  0.0000
-## [2,] 0.000  2.4895  1.8764 0.000 0.000  0.0000
-## [3,] 0.000  0.0000  1.4603 0.000 0.000  0.0000
-## [4,] 0.000  0.0000  0.0000 2.449 1.790 -0.2310
-## [5,] 0.000  0.0000  0.0000 0.000 1.706  0.4231
-## [6,] 0.000  0.0000  0.0000 0.000 0.000  2.1006
+<pre><code>## Error: error in evaluating the argument &#39;x&#39; in selecting a method for function &#39;chol&#39;: Error in
+## as.matrix(Ut %*% t(Ut)) : error in evaluating the argument &#39;x&#39; in selecting a method for function
+## &#39;as.matrix&#39;: Error: object &#39;Ut&#39; not found
 </code></pre>
 
 <h2>From Bates but with commented-out parts</h2>
@@ -806,20 +757,22 @@ nobs &lt;- length(mu)
 <pre><code class="r">(Ut &lt;- Lambdat %*% Zt)
 </code></pre>
 
-<pre><code>## 6 x 10 sparse Matrix of class &quot;dgCMatrix&quot;
-##                                                                                  
-## [1,] .     1.0000  1.00000  1.000 .       1.00000  .        .       .      1.0000
-## [2,] .     0.3898 -0.62124 -2.215 .      -0.04493  .        .       .      0.5939
-## [3,] .     0.7821  0.07456 -1.989 .      -0.05613  .        .       .      0.4179
-## [4,] 1.000 .       .        .     1.0000  .        1.00000  1.0000  1.0000 .     
-## [5,] 1.512 .       .        .     1.1249  .       -0.01619  0.9438  0.8212 .     
-## [6,] 0.919 .       .        .     0.6198  .       -0.15580 -1.4708 -0.4782 .
+<pre><code>## Error: object &#39;Lambdat&#39; not found
 </code></pre>
 
 <p>And I find that a couple more matrices on this theme are also useful,</p>
 
 <pre><code class="r">UtU &lt;- UtUpI &lt;- Ut %*% t(Ut)
-diag(UtUpI) &lt;- diag(UtUpI) + 1
+</code></pre>
+
+<pre><code>## Error: object &#39;Ut&#39; not found
+</code></pre>
+
+<pre><code class="r">diag(UtUpI) &lt;- diag(UtUpI) + 1
+</code></pre>
+
+<pre><code>## Error: error in evaluating the argument &#39;x&#39; in selecting a method for function &#39;diag&#39;: Error:
+## object &#39;UtUpI&#39; not found
 </code></pre>
 
 <p>The Cholesky decomposition of <code>UtUpI</code> is used alot too,</p>
@@ -827,17 +780,8 @@ diag(UtUpI) &lt;- diag(UtUpI) + 1
 <pre><code class="r">(L &lt;- Cholesky(UtUpI))
 </code></pre>
 
-<pre><code>## &#39;MatrixFactorization&#39; of Formal class &#39;dCHMsimpl&#39; [package &quot;Matrix&quot;] with 10 slots
-##   ..@ x       : num [1:12] 6 -0.316 -0.128 6.198 0.754 ...
-##   ..@ p       : int [1:7] 0 3 5 6 9 11 12
-##   ..@ i       : int [1:12] 0 1 2 1 2 2 3 4 5 4 ...
-##   ..@ nz      : int [1:6] 3 2 1 3 2 1
-##   ..@ nxt     : int [1:8] 1 2 3 4 5 6 -1 0
-##   ..@ prv     : int [1:8] 7 0 1 2 3 4 5 -1
-##   ..@ colcount: int [1:6] 3 2 1 3 2 1
-##   ..@ perm    : int [1:6] 0 1 2 3 4 5
-##   ..@ type    : int [1:4] 2 0 0 1
-##   ..@ Dim     : int [1:2] 6 6
+<pre><code>## Error: error in evaluating the argument &#39;A&#39; in selecting a method for function &#39;Cholesky&#39;: Error:
+## object &#39;UtUpI&#39; not found
 </code></pre>
 
 <p>The <code>L</code> object is a <strong>sparse</strong> Cholesky factor of class <code>dCHMsimpl</code>.</p>
@@ -847,17 +791,8 @@ diag(UtUpI) &lt;- diag(UtUpI) + 1
 <pre><code class="r">(L &lt;- update(L, Ut, mult = 1))
 </code></pre>
 
-<pre><code>## &#39;MatrixFactorization&#39; of Formal class &#39;dCHMsimpl&#39; [package &quot;Matrix&quot;] with 10 slots
-##   ..@ x       : num [1:12] 6 -0.316 -0.128 6.198 0.754 ...
-##   ..@ p       : int [1:7] 0 3 5 6 9 11 12
-##   ..@ i       : int [1:12] 0 1 2 1 2 2 3 4 5 4 ...
-##   ..@ nz      : int [1:6] 3 2 1 3 2 1
-##   ..@ nxt     : int [1:8] 1 2 3 4 5 6 -1 0
-##   ..@ prv     : int [1:8] 7 0 1 2 3 4 5 -1
-##   ..@ colcount: int [1:6] 3 2 1 3 2 1
-##   ..@ perm    : int [1:6] 0 1 2 3 4 5
-##   ..@ type    : int [1:4] 2 0 0 1
-##   ..@ Dim     : int [1:2] 6 6
+<pre><code>## Error: error in evaluating the argument &#39;object&#39; in selecting a method for function &#39;update&#39;:
+## Error: object &#39;L&#39; not found
 </code></pre>
 
 <p>In other words the <code>L</code> matrix is <em>updated</em>, but I&#39;m perplexed because its no different than the original <code>L</code> in this case at least.  Maybe it&#39;ll make more sense later.</p>
